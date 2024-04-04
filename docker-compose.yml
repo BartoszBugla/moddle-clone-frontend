@@ -1,0 +1,14 @@
+
+
+version: '3.7'
+
+services:
+  frontend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - "moddle-clone-frontend"
+    ports:
+      - "8080:8080" 
+    

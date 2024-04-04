@@ -1,10 +1,8 @@
-import { IncomingExerciseModelReponse } from '@/lib/api/temp-models'
-
 export interface IncomingExerciseModeProps {
-  ExerciseModel: IncomingExerciseModelReponse[]
+  // ExerciseModel: IncomingExerciseModelReponse[]
   isLoading: boolean
 }
 
-export const IncomingExerciseMode = (props: IncomingExerciseModeProps) => {
+export const IncomingExerciseMode = () => {
   return <div> </div>
 }
