@@ -64,7 +64,10 @@ export function Dashboard() {
       </div>
 
       {(courses || []).map((course) => (
-        <CourseCard key={course.id} course={course} />
+        <CourseCard
+          key={(course as unknown as { id: number }).id}
+          course={course}
+        />
       ))}
     </div>
   )
