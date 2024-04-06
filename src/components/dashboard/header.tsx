@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
   Sheet,
 } from '@/components/ui'
+import { Route as DashboardRoute } from '@/routes/_protected/dashboard'
 import { Button } from '../ui/button'
 import { SheetContent, SheetTrigger } from '../ui/sheet'
 
@@ -17,16 +18,8 @@ export interface HeaderProps {}
 
 const links = [
   {
-    name: `Create Course`,
-    href: '/courses/create',
-  },
-  {
     name: 'Dashboard',
-    href: '#',
-  },
-  {
-    name: 'Courses',
-    href: '#',
+    href: '/dashboard',
   },
 ]
 
@@ -36,6 +29,7 @@ export const Header = () => {
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         {links.map((link) => (
           <Link
+            key={link.href}
             to={link.href}
             className="text-muted-foreground transition-colors hover:text-foreground text-nowrap"
           >
@@ -54,6 +48,7 @@ export const Header = () => {
           <nav className="grid gap-6 text-lg font-medium">
             {links.map((link) => (
               <Link
+                key={link.href}
                 href={link.href}
                 className="text-muted-foreground hover:text-foreground"
               >
@@ -75,10 +70,9 @@ export const Header = () => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to="/logout">Logout</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

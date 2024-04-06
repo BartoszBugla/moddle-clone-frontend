@@ -1,29 +1,30 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 import { Header } from '@/components/dashboard/header'
+import { useAuth } from '@/lib/store/auth'
 
 export const Route = createFileRoute('/_protected')({
-  // beforeLoad: async ({ location }) => {
-  // if (!useAuth.getState().isAuthenticated) {
-  //   throw redirect({
-  //     to: '/auth/sign-in',
-  //     search: {
-  //       // Use the current location to power a redirect after login
-  //       // (Do not use `router.state.resolvedLocation` as it can
-  //       // potentially lag behind the actual current location)
-  //       redirect: location.href,
-  //     },
-  //   })
-  // }
-  // },
+  beforeLoad: async ({ location }) => {
+    if (!useAuth.getState().isAuthenticated) {
+      throw redirect({
+        to: '/sign-in',
+        search: {
+          redirect: location.href,
+        },
+      })
+    }
+  },
   component: ProtectedRouteLayout,
 })
 
 export function ProtectedRouteLayout() {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <Outlet />
+
+      <main className="flex flex-1 flex-col p-4 dark:bg-muted/20 bg-muted/60">
+        <Outlet />
+      </main>
     </div>
   )
 }

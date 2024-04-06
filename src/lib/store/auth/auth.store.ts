@@ -18,32 +18,6 @@ const defaultAuthState: AuthState = {
   accessTokenPayload: null,
 }
 
-interface CreateAuthStorageOptions {
-  persist?: boolean
-}
-
-/**
- * Returns local or session storage based on the options or the current state of the storage.
- * @param options Options used to initialize the auth store storage.
- * @returns localStorage if `persist` is `true` or if the localStorage was initialized previously, and sessionStorage otherwise,
- * @example
- * createAuthStorage({ persist: true }) // returns localStorage
- * createAuthStorage({ persist: false }) // returns sessionStorage
- * createAuthStorage() // returns the localStorage if it was initialized, otherwise returns sessionStorage.
- */
-const createAuthStorage = ({ persist }: CreateAuthStorageOptions = {}) => {
-  const isPersistentStorageInitialized =
-    !!localStorage.getItem(AUTH_STORAGE_KEY)
-
-  if (persist ?? isPersistentStorageInitialized) {
-    sessionStorage.removeItem(AUTH_STORAGE_KEY)
-    return localStorage
-  }
-
-  localStorage.removeItem(AUTH_STORAGE_KEY)
-  return sessionStorage
-}
-
 const decodeToken = (token: string | null) => {
   try {
     if (!token) return
@@ -71,8 +45,6 @@ export const useAuth = create<AuthStore>()(
         }
       },
       signOut: () => {
-        window.localStorage.clear()
-        window.sessionStorage.clear()
         set(() => defaultAuthState)
       },
       setTokenPayload: (payload) => {
@@ -86,13 +58,7 @@ export const useAuth = create<AuthStore>()(
     }),
     {
       name: AUTH_STORAGE_KEY,
-      storage: createJSONStorage(createAuthStorage),
+      storage: createJSONStorage(() => localStorage),
     }
   )
 )
-
-export const setAuthStorage = (options: CreateAuthStorageOptions) =>
-  useAuth.persist.setOptions({
-    name: AUTH_STORAGE_KEY,
-    storage: createJSONStorage(() => createAuthStorage(options)),
-  })

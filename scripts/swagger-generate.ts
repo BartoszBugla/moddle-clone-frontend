@@ -7,7 +7,7 @@ const PATH_TO_OUTPUT_DIR = './src/lib/api'
 
 const TEMP_FILE = './temp.json'
 
-const API_JSON_URL = `${process.env.VITE_API_BASE_URL}/api-docs-json`
+const API_JSON_URL = `${process.env.VITE_API_BASE_URL}/swagger/v1/swagger.json`
 
 /** @type {sta.GenerateApiParams} */
 const baseConfig = {

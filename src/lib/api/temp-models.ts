@@ -3,9 +3,12 @@ export interface GradeModel {
 
   grade: number
   comment: string
-  reviewedBy: UserModel
-  exerciseId: number
-  exercise: number
+  reviewedById: UserModel['id']
+  exerciseId: ExerciseModel['id']
+
+  reviewedBy?: UserModel
+  exercise?: ExerciseModel
+
   createdAt: string
   updatedAt: string
 }
@@ -21,13 +24,15 @@ export interface CourseModel {
   name: string
   description: string
 
-  exercises: ExerciseModel[]
-  owner: UserModel
-  teachers: UserModel[]
-  students: UserModel[]
+  ownerId: UserModel['id']
+  owner?: UserModel
 
-  createdAt: string
-  updatedAt: string
+  teachers?: UserModel[]
+  students?: UserModel[]
+  exercises?: ExerciseModel[]
+
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface FileMetadataModel {
@@ -45,12 +50,12 @@ export interface ExerciseModel {
 
   courseId: number
   name: string
-  description: string
-  endsAt: string
-  startsAt: string
+  description?: string
+  endsAt?: string
+  startsAt?: string
 
-  files: FileMetadataModel[]
-  grade: GradeModel
+  files?: FileMetadataModel[]
+  grade?: GradeModel
 
   createdAt: string
   updatedAt: string
@@ -58,16 +63,18 @@ export interface ExerciseModel {
 
 export interface UserModel {
   id: number
-  username: string
-  email: string
-  role: RoleModel
+  name?: string
+  surname?: string
+  username?: string
+  email?: string
+  role?: RoleModel
 
-  exercises: ExerciseModel[]
+  exercises?: ExerciseModel[]
+  courses?: CourseModel[]
+  coursesOwned?: CourseModel[]
 
-  courses: CourseModel[]
-  coursesOwned: CourseModel[]
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface PaginatedModel<T> {

@@ -10,7 +10,7 @@ import { queryClient } from '@/config/query-client'
 export const Route = createRootRoute({
   component: () => (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Outlet />
         </TooltipProvider>

@@ -17,6 +17,8 @@ import { Route as ProtectedImport } from './routes/_protected'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProtectedDashboardImport } from './routes/_protected/dashboard'
+import { Route as AuthLogoutImport } from './routes/_auth/logout'
+import { Route as ProtectedCoursesIdImport } from './routes/_protected/courses/$id'
 
 // Create Virtual Routes
 
@@ -24,9 +26,6 @@ const AuthSignUpLazyImport = createFileRoute('/_auth/sign-up')()
 const AuthSignInLazyImport = createFileRoute('/_auth/sign-in')()
 const ProtectedCoursesCreateLazyImport = createFileRoute(
   '/_protected/courses/create',
-)()
-const ProtectedCoursesIdLazyImport = createFileRoute(
-  '/_protected/courses/$id',
 )()
 
 // Create/Update Routes
@@ -61,6 +60,11 @@ const ProtectedDashboardRoute = ProtectedDashboardImport.update({
   getParentRoute: () => ProtectedRoute,
 } as any)
 
+const AuthLogoutRoute = AuthLogoutImport.update({
+  path: '/logout',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const ProtectedCoursesCreateLazyRoute = ProtectedCoursesCreateLazyImport.update(
   {
     path: '/courses/create',
@@ -70,7 +74,7 @@ const ProtectedCoursesCreateLazyRoute = ProtectedCoursesCreateLazyImport.update(
   import('./routes/_protected/courses/create.lazy').then((d) => d.Route),
 )
 
-const ProtectedCoursesIdLazyRoute = ProtectedCoursesIdLazyImport.update({
+const ProtectedCoursesIdRoute = ProtectedCoursesIdImport.update({
   path: '/courses/$id',
   getParentRoute: () => ProtectedRoute,
 } as any).lazy(() =>
@@ -93,6 +97,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedImport
       parentRoute: typeof rootRoute
     }
+    '/_auth/logout': {
+      preLoaderRoute: typeof AuthLogoutImport
+      parentRoute: typeof AuthImport
+    }
     '/_protected/dashboard': {
       preLoaderRoute: typeof ProtectedDashboardImport
       parentRoute: typeof ProtectedImport
@@ -106,7 +114,7 @@ declare module '@tanstack/react-router' {
       parentRoute: typeof AuthImport
     }
     '/_protected/courses/$id': {
-      preLoaderRoute: typeof ProtectedCoursesIdLazyImport
+      preLoaderRoute: typeof ProtectedCoursesIdImport
       parentRoute: typeof ProtectedImport
     }
     '/_protected/courses/create': {
@@ -120,10 +128,14 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  AuthRoute.addChildren([AuthSignInLazyRoute, AuthSignUpLazyRoute]),
+  AuthRoute.addChildren([
+    AuthLogoutRoute,
+    AuthSignInLazyRoute,
+    AuthSignUpLazyRoute,
+  ]),
   ProtectedRoute.addChildren([
     ProtectedDashboardRoute,
-    ProtectedCoursesIdLazyRoute,
+    ProtectedCoursesIdRoute,
     ProtectedCoursesCreateLazyRoute,
   ]),
 ])
