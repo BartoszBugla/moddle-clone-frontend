@@ -4,7 +4,7 @@ import { createRouter } from '@tanstack/react-router'
 import { routeTree } from '@/routeTree.gen'
 
 // Create a new router instance
-export const router = createRouter({ routeTree })
+export const router = createRouter({ routeTree, basepath: '/moddle-clone' })
 
 declare module '@tanstack/react-router' {
   interface Register {

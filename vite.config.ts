@@ -7,10 +7,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react(), TanStackRouterVite()],
   base: '/moddle-clone',
-  esbuild: {
-    target: 'esnext',
-    platform: 'node',
-  },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
