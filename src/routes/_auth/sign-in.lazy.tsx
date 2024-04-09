@@ -68,8 +68,8 @@ export function SignIn() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <FormInput name="username" />
-          <FormInput name="password" type="password" />
+          <FormInput label="Username" name="username" />
+          <FormInput label="Password" name="password" type="password" />
         </CardContent>
         <p className="text-sm text-destructive p-6 pt-0">{error?.message}</p>
         <CardFooter className="flex flex-col gap-2">
