@@ -1,11 +1,9 @@
 // Import the generated route tree
-import { createMemoryHistory, createRouter } from '@tanstack/react-router'
+import { createHashHistory, createRouter } from '@tanstack/react-router'
 
 import { routeTree } from '@/routeTree.gen'
 
-const memoryHistory = createMemoryHistory({
-  initialEntries: ['/'],
-})
+const memoryHistory = createHashHistory({})
 
 // Create a new router instance
 export const router = createRouter({
