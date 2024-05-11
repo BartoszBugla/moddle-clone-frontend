@@ -36,7 +36,7 @@ function CoursePage() {
   const { data } = useQuery({
     queryKey: ['course', id],
     enabled: !!id,
-    queryFn: () => id && api.course.courseDetail(id),
+    queryFn: () => api.course.courseDetail(Number(id)),
   })
 
   if (!id) {

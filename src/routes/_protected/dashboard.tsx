@@ -34,8 +34,8 @@ export interface CourseCardProps {
 export const CourseCard = ({ course, inCourse }: CourseCardProps) => {
   const errorHandler = useErrorHandler()
   const { mutateAsync: enroll } = useMutation({
-    mutationFn: () =>
-      course.id ? api.enrollment.joinCourseCreate(course.id) : null,
+    mutationFn: () => api.enrollment.joinCourseCreate(course.id || 0),
+
     onSuccess: () => {
       toast.success('Enrolled successfully')
     },
@@ -55,7 +55,11 @@ export const CourseCard = ({ course, inCourse }: CourseCardProps) => {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className=" text-xl font-medium">{course.name}</CardTitle>
           {!inCourse && (
-            <Button onClick={enroll} className="text-xs">
+            <Button
+              disabled={!course.id}
+              onClick={() => enroll()}
+              className="text-xs"
+            >
               Enroll
             </Button>
           )}
@@ -138,7 +142,7 @@ export function Dashboard() {
             {(courses || []).map((course, idx) => (
               <CourseCard
                 key={idx}
-                course={course}
+                course={course as any}
                 inCourse={formProps.watch('type') === 'my-courses'}
               />
             ))}

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Check, CheckCircle, CircleUser, Menu, X } from 'lucide-react'
 
@@ -13,7 +13,6 @@ import {
 } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/store/auth'
-import { Route as DashboardRoute } from '@/routes/_protected/dashboard'
 import { Button } from '../ui/button'
 import { SheetContent, SheetTrigger } from '../ui/sheet'
 
@@ -40,6 +39,8 @@ export const Header = () => {
   //   mutationFn: api,
   // })
 
+  if (!profile) return null
+
   return (
     <header className="sticky top-0 flex z-50 h-16 items-center gap-4 border-b-2 backdrop-blur-[20px] px-4 md:px-6 bg-background/50">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -65,7 +66,7 @@ export const Header = () => {
                 <CheckCircle className="size-4" />
               </DropdownMenuLabel>
             )}
-            {(data || []).map((invitation) => (
+            {(data || []).map((invitation: any) => (
               <DropdownMenuLabel
                 key={invitation.id}
                 className="flex flex-row gap-2 items-center"
