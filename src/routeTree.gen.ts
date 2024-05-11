@@ -18,14 +18,16 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProtectedDashboardImport } from './routes/_protected/dashboard'
 import { Route as AuthLogoutImport } from './routes/_auth/logout'
-import { Route as ProtectedCoursesIdImport } from './routes/_protected/courses/$id'
 
 // Create Virtual Routes
 
 const AuthSignUpLazyImport = createFileRoute('/_auth/sign-up')()
 const AuthSignInLazyImport = createFileRoute('/_auth/sign-in')()
-const ProtectedCoursesCreateLazyImport = createFileRoute(
-  '/_protected/courses/create',
+const ProtectedCoursesIdLazyImport = createFileRoute(
+  '/_protected/courses/$id',
+)()
+const ProtectedCoursesManageIdLazyImport = createFileRoute(
+  '/_protected/courses/manage/$id',
 )()
 
 // Create/Update Routes
@@ -65,21 +67,20 @@ const AuthLogoutRoute = AuthLogoutImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
-const ProtectedCoursesCreateLazyRoute = ProtectedCoursesCreateLazyImport.update(
-  {
-    path: '/courses/create',
-    getParentRoute: () => ProtectedRoute,
-  } as any,
-).lazy(() =>
-  import('./routes/_protected/courses/create.lazy').then((d) => d.Route),
-)
-
-const ProtectedCoursesIdRoute = ProtectedCoursesIdImport.update({
+const ProtectedCoursesIdLazyRoute = ProtectedCoursesIdLazyImport.update({
   path: '/courses/$id',
   getParentRoute: () => ProtectedRoute,
 } as any).lazy(() =>
   import('./routes/_protected/courses/$id.lazy').then((d) => d.Route),
 )
+
+const ProtectedCoursesManageIdLazyRoute =
+  ProtectedCoursesManageIdLazyImport.update({
+    path: '/courses/manage/$id',
+    getParentRoute: () => ProtectedRoute,
+  } as any).lazy(() =>
+    import('./routes/_protected/courses/manage/$id.lazy').then((d) => d.Route),
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -114,11 +115,11 @@ declare module '@tanstack/react-router' {
       parentRoute: typeof AuthImport
     }
     '/_protected/courses/$id': {
-      preLoaderRoute: typeof ProtectedCoursesIdImport
+      preLoaderRoute: typeof ProtectedCoursesIdLazyImport
       parentRoute: typeof ProtectedImport
     }
-    '/_protected/courses/create': {
-      preLoaderRoute: typeof ProtectedCoursesCreateLazyImport
+    '/_protected/courses/manage/$id': {
+      preLoaderRoute: typeof ProtectedCoursesManageIdLazyImport
       parentRoute: typeof ProtectedImport
     }
   }
@@ -135,8 +136,8 @@ export const routeTree = rootRoute.addChildren([
   ]),
   ProtectedRoute.addChildren([
     ProtectedDashboardRoute,
-    ProtectedCoursesIdRoute,
-    ProtectedCoursesCreateLazyRoute,
+    ProtectedCoursesIdLazyRoute,
+    ProtectedCoursesManageIdLazyRoute,
   ]),
 ])
 

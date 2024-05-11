@@ -1,8 +1,10 @@
 import type { InternalAxiosRequestConfig } from 'axios'
 
+import { useAuth } from '@/lib/store/auth'
+
 // handle getting and refreshing token here
 const getToken = async () => {
-  return ''
+  return useAuth.getState().accessToken
 }
 
 export const authRequestMiddleware = async ({

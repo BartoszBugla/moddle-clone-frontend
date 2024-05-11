@@ -1,6 +1,9 @@
 import { JwtPayload } from 'jwt-decode'
 
-export interface AccessTokenPayload extends JwtPayload {}
+export interface AccessTokenPayload extends JwtPayload {
+  role: string
+  name: string
+}
 
 export interface AuthState {
   isAuthenticated: boolean
@@ -22,7 +25,6 @@ export interface SetTokenPayload {
 export interface AuthActions {
   signIn: (payload: SignInPayload) => void
   signOut: () => void
-  setTokenPayload: (tokenPayload: Partial<AccessTokenPayload>) => void
 }
 
 export type AuthStore = AuthState & AuthActions

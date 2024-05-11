@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { api } from '@/lib/api'
+import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { useAuth } from '@/lib/store/auth'
 import { Route as DashboardRoute } from '@/routes/_protected/dashboard'
 
@@ -34,6 +35,7 @@ type FormValues = z.infer<typeof schema>
 export function SignIn() {
   const navigate = useNavigate()
   const signIn = useAuth((state) => state.signIn)
+  const errorHandler = useErrorHandler()
 
   const { mutateAsync, error } = useMutation({
     mutationFn: api.user.loginCreate,
@@ -71,12 +73,16 @@ export function SignIn() {
           <FormInput label="Username" name="username" />
           <FormInput label="Password" name="password" type="password" />
         </CardContent>
-        <p className="text-sm text-destructive p-6 pt-0">{error?.message}</p>
+        {error && (
+          <p className="text-sm text-destructive p-6 pt-0">
+            {errorHandler(error).message}
+          </p>
+        )}
         <CardFooter className="flex flex-col gap-2">
           <Button className="w-full">Sign in</Button>
 
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
+            Don&apos;t have an account?&nbsp;
             <Link to={'/sign-up'} className="underline">
               Sign up
             </Link>

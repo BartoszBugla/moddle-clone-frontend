@@ -17,10 +17,10 @@ import axios, {
 } from 'axios'
 
 export interface CourseDTO {
+  /** @format int32 */
+  id?: number | null
   name?: string | null
   description?: string | null
-  /** @format int32 */
-  userId?: number
 }
 
 export interface DateOnly {
@@ -46,6 +46,12 @@ export enum DayOfWeek {
   Value4 = 4,
   Value5 = 5,
   Value6 = 6,
+}
+
+export interface EditExerciseDTO {
+  exerciseName?: string | null
+  exerciseDescription?: string | null
+  deadLine?: string | null
 }
 
 export interface RegisterDTO {
@@ -264,11 +270,11 @@ export class Api<
      *
      * @tags Course
      * @name AllCourseDetail
-     * @request GET:/Course/AllCourse/{id}
+     * @request GET:/Course/AllCourse/{userId}
      */
-    allCourseDetail: (id: number, params: RequestParams = {}) =>
+    allCourseDetail: (userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Course/AllCourse/${id}`,
+        path: `/Course/AllCourse/${userId}`,
         method: 'GET',
         ...params,
       }),
@@ -277,13 +283,13 @@ export class Api<
      * No description
      *
      * @tags Course
-     * @name DeleteCoruseDelete
-     * @request DELETE:/Course/DeleteCoruse/{id}
+     * @name CourseDetail
+     * @request GET:/Course/{courseId}
      */
-    deleteCoruseDelete: (id: number, params: RequestParams = {}) =>
+    courseDetail: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Course/DeleteCoruse/${id}`,
-        method: 'DELETE',
+        path: `/Course/${courseId}`,
+        method: 'GET',
         ...params,
       }),
 
@@ -302,19 +308,307 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @tags Course
+     * @name EditCoursePartialUpdate
+     * @request PATCH:/Course/EditCourse/{courseId}
+     */
+    editCoursePartialUpdate: (
+      courseId: number,
+      data: CourseDTO,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Course/EditCourse/${courseId}`,
+        method: 'PATCH',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Course
+     * @name DeleteCourseDelete
+     * @request DELETE:/Course/DeleteCourse/{courseId}
+     */
+    deleteCourseDelete: (courseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Course/DeleteCourse/${courseId}`,
+        method: 'DELETE',
+        ...params,
+      }),
+  }
+  enrollment = {
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name InCourseDetail
+     * @request GET:/Enrollment/InCourse/{courseId}
+     */
+    inCourseDetail: (courseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Enrollment/InCourse/${courseId}`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name NotInCourseYetDetail
+     * @request GET:/Enrollment/NotInCourseYet/{courseId}
+     */
+    notInCourseYetDetail: (courseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Enrollment/NotInCourseYet/${courseId}`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name InvitedCourseList
+     * @request GET:/Enrollment/InvitedCourse
+     */
+    invitedCourseList: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Enrollment/InvitedCourse`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name MyCoursesList
+     * @request GET:/Enrollment/MyCourses
+     */
+    myCoursesList: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Enrollment/MyCourses`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name JoinCourseCreate
+     * @request POST:/Enrollment/JoinCourse/{courseId}
+     */
+    joinCourseCreate: (courseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Enrollment/JoinCourse/${courseId}`,
+        method: 'POST',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name AcceptJoinPartialUpdate
+     * @request PATCH:/Enrollment/AcceptJoin/{courseId}
+     */
+    acceptJoinPartialUpdate: (
+      courseId: number,
+      data: number[],
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Enrollment/AcceptJoin/${courseId}`,
+        method: 'PATCH',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name RemoveUserDelete
+     * @request DELETE:/Enrollment/RemoveUser/{courseId}
+     */
+    removeUserDelete: (
+      courseId: number,
+      data: number[],
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Enrollment/RemoveUser/${courseId}`,
+        method: 'DELETE',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   }
   exercise = {
     /**
      * No description
      *
      * @tags Exercise
-     * @name ExerciseDetail
-     * @request GET:/Exercise/Exercise/{id}
+     * @name AllExerciseInCourseDetail
+     * @request GET:/Exercise/{courseId}/AllExerciseInCourse
      */
-    exerciseDetail: (id: number, params: RequestParams = {}) =>
+    allExerciseInCourseDetail: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Exercise/Exercise/${id}`,
+        path: `/Exercise/${courseId}/AllExerciseInCourse`,
         method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name ExerciseDetail
+     * @request GET:/Exercise/{exerciseId}
+     */
+    exerciseDetail: (exerciseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Exercise/${exerciseId}`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name FileDetail
+     * @request GET:/Exercise/{exerciseId}/File
+     */
+    fileDetail: (exerciseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Exercise/${exerciseId}/File`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name AddExerciseCreate
+     * @request POST:/Exercise/AddExercise
+     */
+    addExerciseCreate: (
+      data: {
+        /** @format binary */
+        File?: File
+      },
+      query?: {
+        /** @format int32 */
+        CourseId?: number
+        ExerciseName?: string
+        ExerciseDescription?: string
+        DeadLine?: string
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Exercise/AddExercise`,
+        method: 'POST',
+        query: query,
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name AddFileToExercisePartialUpdate
+     * @request PATCH:/Exercise/{exerciseId}/AddFileToExercise
+     */
+    addFileToExercisePartialUpdate: (
+      exerciseId: number,
+      data: {
+        /** @format binary */
+        file?: File
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Exercise/${exerciseId}/AddFileToExercise`,
+        method: 'PATCH',
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name EditExercisePartialUpdate
+     * @request PATCH:/Exercise/{exerciseId}/EditExercise
+     */
+    editExercisePartialUpdate: (
+      exerciseId: number,
+      data: EditExerciseDTO,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Exercise/${exerciseId}/EditExercise`,
+        method: 'PATCH',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name DeleteExerciseDelete
+     * @request DELETE:/Exercise/DeleteExercise
+     */
+    deleteExerciseDelete: (
+      query?: {
+        /** @format int32 */
+        exerciseId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Exercise/DeleteExercise`,
+        method: 'DELETE',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name DeleteFileDelete
+     * @request DELETE:/Exercise/DeleteFile
+     */
+    deleteFileDelete: (
+      query?: {
+        /** @format int32 */
+        fileId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/Exercise/DeleteFile`,
+        method: 'DELETE',
+        query: query,
         ...params,
       }),
   }
@@ -330,20 +624,6 @@ export class Api<
       this.request<void, any>({
         path: `/User/AllUsers`,
         method: 'GET',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags User
-     * @name DeleteUserDelete
-     * @request DELETE:/User/DeleteUser/{id}
-     */
-    deleteUserDelete: (id: number, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/User/DeleteUser/${id}`,
-        method: 'DELETE',
         ...params,
       }),
 
@@ -376,6 +656,27 @@ export class Api<
         method: 'POST',
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags User
+     * @name DeleteUserDelete
+     * @request DELETE:/User/DeleteUser
+     */
+    deleteUserDelete: (
+      query?: {
+        /** @format int32 */
+        id?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/User/DeleteUser`,
+        method: 'DELETE',
+        query: query,
         ...params,
       }),
   }

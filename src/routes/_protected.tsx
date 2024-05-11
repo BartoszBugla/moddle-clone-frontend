@@ -22,9 +22,7 @@ export function ProtectedRouteLayout() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex flex-1 flex-col p-4 dark:bg-muted/20 bg-muted/60">
-        <Outlet />
-      </main>
+      <Outlet />
     </div>
   )
 }

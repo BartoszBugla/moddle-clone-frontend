@@ -16,6 +16,8 @@ import {
   CardTitle,
 } from '@/components/ui'
 import { api } from '@/lib/api'
+import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
+import { useAuth } from '@/lib/store/auth'
 import { Route as DashboardRoute } from '@/routes/_protected/dashboard'
 
 export const Route = createLazyFileRoute('/_auth/sign-up')({
@@ -33,12 +35,20 @@ type FormValues = z.infer<typeof schema>
 
 export function SignUp() {
   const navigate = useNavigate()
+  const errorHandler = useErrorHandler()
+
+  const signIn = useAuth((state) => state.signIn)
 
   const { mutateAsync, error } = useMutation({
     mutationFn: api.user.registerCreate,
-    onSuccess: () => {
-      navigate({ to: DashboardRoute.fullPath })
+    onError: (err) => {
+      errorHandler(err, { notify: true })
     },
+  })
+
+  const { mutateAsync: mutateSignIn } = useMutation({
+    mutationFn: api.user.loginCreate,
+    onError: (err) => errorHandler(err, { notify: true }),
   })
 
   const formProps = useForm<FormValues>({
@@ -57,7 +67,15 @@ export function SignUp() {
       surname: values.surname,
       password: values.password,
       username: values.username,
+      roleId: 0, // teacher 1 is for user,
     })
+
+    const token = (await mutateSignIn(values)) as unknown as string
+
+    signIn({
+      accessToken: token,
+    })
+    navigate({ to: DashboardRoute.fullPath })
   }
 
   return (
@@ -78,12 +96,16 @@ export function SignUp() {
           <FormInput label="Username" name="username" />
           <FormInput label="Password" name="password" type="password" />
         </CardContent>
-        <p>{error?.message}</p>
+        {error && (
+          <p className="text-sm text-destructive p-6 pt-0">
+            {errorHandler(error).message}
+          </p>
+        )}
         <CardFooter className="flex flex-col gap-2">
           <Button className="w-full">Sign in</Button>
 
           <div className="mt-4 text-center text-sm">
-            Already have an account?
+            Already have an account?&nbsp;
             <Link to="/sign-in" className="underline">
               Sign in
             </Link>
