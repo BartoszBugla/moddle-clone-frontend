@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { Dialog, DialogContent, DialogTrigger } from '@radix-ui/react-dialog'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createLazyFileRoute,
   Link,
@@ -30,6 +30,7 @@ import {
 } from '@/components/ui'
 import { api, CourseStudentDto } from '@/lib/api'
 import { RoleModel } from '@/lib/api/temp-models'
+import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { useAuth } from '@/lib/store/auth'
 import { cn } from '@/lib/utils'
 import { CourseCard } from '../dashboard'
@@ -40,23 +41,39 @@ export const Route = createLazyFileRoute('/_protected/courses/$id')({
 
 function CoursePage() {
   const { id } = Route.useParams()
-
+  const navigate = Route.useNavigate()
   const tokenPayload = useAuth((s) => s.accessTokenPayload)
-
-  // const isTeacherInCourse = tokenPayload?.role
+  const errorHandler = useErrorHandler()
+  const queryClient = useQueryClient()
 
   const { data: courseData } = useQuery({
     queryKey: ['course', id],
     enabled: !!id,
     queryFn: () => api.courses.coursesDetail(Number(id)),
+    retry(failureCount, error) {
+      errorHandler(error, { notify: true })
+      navigate({ to: '/dashboard' })
+      return false
+    },
   })
 
   const { mutateAsync: acceptUser } = useMutation({
     mutationFn: (userId: number) =>
-      api.enrollments.acceptDetail(Number(id), userId),
+      api.enrollments.acceptPartialUpdate(Number(id), userId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course', id] })
+    },
   })
 
-  console.log(tokenPayload, courseData?.user)
+  const { mutateAsync: deleteUser } = useMutation({
+    mutationFn: (userId: number) =>
+      api.enrollments.declineDelete(Number(id), userId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['course', id] })
+    },
+  })
 
   const isOnwer = tokenPayload?.id === courseData?.user?.id?.toString()
 
@@ -89,18 +106,20 @@ function CoursePage() {
             </CardHeader>
             <CardContent className="h-full">
               {/* // TODO filter out logged user */}
-              <ul className="flex flex-1 flex-col gap-2 overflow-y-auto max-h-[200px]">
+              <ul className="flex flex-1 flex-col overflow-y-auto max-h-[200px]">
                 {(courseData?.students || []).map((student, idx) => {
                   return (
                     <li
                       key={student.id}
-                      className="flex flex-row justify-between text-sm items-center h-10"
+                      className="flex flex-row justify-between text-sm items-center my-1 border-b border-border"
                     >
-                      <div className="flex flex-row gap-2 items-center overflow-auto">
-                        {/* <span>{student.username}</span> */}
-                        <span>
-                          {idx + 1}. {student.name} {student.surname}
-                        </span>
+                      <div className="flex flex-col items-start overflow-auto ">
+                        <div>
+                          {idx + 1}.{student.username}
+                        </div>
+                        <div>
+                          {student.name} {student.surname}
+                        </div>
                       </div>
                       {isOnwer && (
                         <span className="ml-auto h-10">
@@ -112,10 +131,18 @@ function CoursePage() {
 
                           {student.userDecision && (
                             <>
-                              <Button size="icon" variant="ghost">
+                              <Button
+                                onClick={() => deleteUser(student.id || 0)}
+                                size="icon"
+                                variant="ghost"
+                              >
                                 <X />
                               </Button>
-                              <Button size="icon" variant="ghost">
+                              <Button
+                                onClick={() => acceptUser(student.id || 0)}
+                                size="icon"
+                                variant="ghost"
+                              >
                                 <Check className="text-destructive" />
                               </Button>
                             </>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { api } from '@/lib/api'
+import { useAuth } from '@/lib/store/auth'
 import { Button } from '../ui'
 import {
   Dialog,
@@ -22,6 +23,7 @@ export const InviteUserDialog = ({
   courseId,
 }: InviteUserDialogProps) => {
   const queryClient = useQueryClient()
+  const profile = useAuth((state) => state.accessTokenPayload)
   // TODO filter out logged user
   const { data: users } = useQuery({
     queryKey: ['users'],
@@ -55,7 +57,12 @@ export const InviteUserDialog = ({
         </DialogHeader>
         <ul className="flex flex-col gap-2 overflow-y-auto max-h-[200px]">
           {(users || [])
-            .filter((user) => !usersInCourse.includes(user.id))
+            .filter(
+              (user) =>
+                user?.id &&
+                user.id !== Number(profile?.id || 0) &&
+                !usersInCourse.includes(user.id)
+            )
             .map((student, idx) => {
               return (
                 <li
@@ -69,7 +76,7 @@ export const InviteUserDialog = ({
                       {student.username})
                     </span>
                   </div>
-                  <Button onClick={() => invite(student.id)} size="sm">
+                  <Button onClick={() => invite(student?.id || 0)} size="sm">
                     Invite
                   </Button>
                 </li>

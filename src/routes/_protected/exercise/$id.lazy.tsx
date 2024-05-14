@@ -30,20 +30,20 @@ function ExercisePage() {
     <Layout>
       <div className="grid grid-cols-1 gap-4 mb-10">
         <div className="sm:col-span-12 col-span-1 flex flex-row justify-between items-center mt-4">
-          <Link
+          {/* <Link
             to="/courses/$id"
-            params={{ id: exercise?.courseId }}
+            // params={{ id: exercise?.courseId }}
             className={cn(
               'flex flex-row gap-2',
               buttonVariants({ variant: 'ghost' })
             )}
           >
             <ArrowLeft /> Back to Course
-          </Link>
+          </Link> */}
         </div>
         <Card className="col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <h1 className="text-xl font-medium">{exercise.title}</h1>
+            {/* <h1 className="text-xl font-medium">{exercise.title}</h1> */}
           </CardHeader>
         </Card>
       </div>

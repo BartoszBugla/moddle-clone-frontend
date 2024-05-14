@@ -15,6 +15,7 @@ export enum AllCourseType {
   All = 'All',
   User = 'User',
   InvitedTo = 'InvitedTo',
+  NotUser = 'NotUser',
 }
 
 export interface CourseDTO {
@@ -39,11 +40,13 @@ export interface CourseListItemDTO {
   id?: number
   name?: string | null
   description?: string | null
-  enrolled?: boolean
-  invitedTo?: boolean
-  inCourse?: boolean
+  adminDecision?: boolean
+  userDecision?: boolean
   user?: UserDTO
   exercises?: InfoExerciseDTO[] | null
+  enrolled?: boolean
+  inCourse?: boolean
+  invitedTo?: boolean
 }
 
 export interface CourseStudentDto {
@@ -333,13 +336,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Enrollment
-     * @name AcceptDetail
-     * @request GET:/enrollments/{courseId}/accept/{userId}
+     * @name AcceptPartialUpdate
+     * @request PATCH:/enrollments/{courseId}/accept/{userId}
      */
-    acceptDetail: (courseId: number, userId: number, params: RequestParams = {}) =>
+    acceptPartialUpdate: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/accept/${userId}`,
-        method: 'GET',
+        method: 'PATCH',
         ...params,
       }),
 
@@ -347,13 +350,28 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Enrollment
-     * @name DeclineDetail
-     * @request GET:/enrollments/{courseId}/decline/{userId}
+     * @name DeclineDelete
+     * @request DELETE:/enrollments/{courseId}/decline/{userId}
      */
-    declineDetail: (courseId: number, userId: number, params: RequestParams = {}) =>
+    declineDelete: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/decline/${userId}`,
-        method: 'GET',
+        method: 'DELETE',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name InviteCreate
+     * @request POST:/enrollments/{courseId}/invite/{userId}
+     */
+    inviteCreate: (courseId: number, userId: number, params: RequestParams = {}) =>
+      this.request<number, any>({
+        path: `/enrollments/${courseId}/invite/${userId}`,
+        method: 'POST',
+        format: 'json',
         ...params,
       }),
 
@@ -375,13 +393,15 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Enrollment
-     * @name InviteCreate
-     * @request POST:/enrollments/{courseId}/invite/{userId}
+     * @name DeclineDelete2
+     * @request DELETE:/enrollments/{courseId}/decline
+     * @originalName declineDelete
+     * @duplicate
      */
-    inviteCreate: (courseId: number, userId: number, params: RequestParams = {}) =>
+    declineDelete2: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/enrollments/${courseId}/invite/${userId}`,
-        method: 'POST',
+        path: `/enrollments/${courseId}/decline`,
+        method: 'DELETE',
         ...params,
       }),
 
@@ -389,36 +409,15 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Enrollment
-     * @name RemoveDelete
-     * @request DELETE:/enrollments/{courseId}/remove/{userId}
+     * @name AcceptPartialUpdate2
+     * @request PATCH:/enrollments/{courseId}/accept
+     * @originalName acceptPartialUpdate
+     * @duplicate
      */
-    removeDelete: (
-      courseId: number,
-      userId: string,
-      query?: {
-        /** @format int32 */
-        usersId?: number
-      },
-      params: RequestParams = {}
-    ) =>
+    acceptPartialUpdate2: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/enrollments/${courseId}/remove/${userId}`,
-        method: 'DELETE',
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Enrollment
-     * @name LeaveDelete
-     * @request DELETE:/enrollments/{courseId}/leave
-     */
-    leaveDelete: (courseId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/enrollments/${courseId}/leave`,
-        method: 'DELETE',
+        path: `/enrollments/${courseId}/accept`,
+        method: 'PATCH',
         ...params,
       }),
   }
@@ -585,9 +584,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/User/AllUsers
      */
     allUsersList: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<UserDTO[], any>({
         path: `/User/AllUsers`,
         method: 'GET',
+        format: 'json',
         ...params,
       }),
 

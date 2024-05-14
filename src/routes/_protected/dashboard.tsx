@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
 import { toast } from 'sonner'
@@ -9,14 +9,8 @@ import Form from '@/components/forms/form'
 import { FormInput } from '@/components/forms/form-input'
 import { FormSelect } from '@/components/forms/form-select'
 import { Button, buttonVariants } from '@/components/ui'
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { AllCourseType, api, CourseDTO, CourseListItemDTO } from '@/lib/api'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AllCourseType, api, CourseListItemDTO } from '@/lib/api'
 import { UserRole } from '@/lib/api/enums/user-role'
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { useAuth } from '@/lib/store/auth'
@@ -32,12 +26,13 @@ export interface CourseCardProps {
 
 export const CourseCard = ({ course }: CourseCardProps) => {
   const errorHandler = useErrorHandler()
-
+  const queryClient = useQueryClient()
   const { mutateAsync: enroll } = useMutation({
     mutationFn: () => api.enrollments.joinCreate(course.id || 0),
 
     onSuccess: () => {
       toast.success('Enrolled successfully')
+      queryClient.invalidateQueries({ queryKey: ['courses'] })
     },
 
     onError: (err) => {
@@ -49,16 +44,16 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     <Card className="h-full flex flex-col">
       <CardHeader className="flex h-auto flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className=" text-xl font-medium">{course.name}</CardTitle>
-        {/* TODO */}
-        {/* {!inCourse && (
+
+        {!course.inCourse && (
           <Button
-            disabled={!course.id}
+            disabled={course.enrolled && !course.inCourse}
             onClick={() => enroll()}
             className="text-xs"
           >
             Enroll
           </Button>
-        )} */}
+        )}
       </CardHeader>
       <CardContent className="h-full flex flex-col justify-between">
         <div className="text-sm line-clamp-3 min-h-6">
@@ -108,6 +103,10 @@ export function Dashboard() {
                 value: AllCourseType.User,
                 label: 'My courses',
               },
+              {
+                value: AllCourseType.NotUser,
+                label: 'Courses to enroll',
+              },
             ]}
           />
           {/* </div> */}
@@ -132,10 +131,13 @@ export function Dashboard() {
           <div className="flex-col gap-4 flex w-full p-4 max-w-[800px] mx-auto pt-2 ">
             {(courses || []).map((course, idx) => (
               <Link
+                disabled={!course.inCourse}
                 key={idx}
                 to="/courses/$id"
                 params={{ id: (course?.id || 1).toString() }}
-                className={cn('cursor-pointer')}
+                className={cn('transition', {
+                  'cursor-pointer hover:brightness-95 ': !course.inCourse,
+                })}
               >
                 <CourseCard key={idx} course={course} />
               </Link>

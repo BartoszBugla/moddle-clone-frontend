@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Check, CheckCircle, CircleUser, Menu, X } from 'lucide-react'
 
@@ -29,20 +29,30 @@ const myInvitations = [{ id: '1', name: 'Invitation 1' }]
 
 export const Header = () => {
   const profile = useAuth((state) => state.accessTokenPayload)
-
+  const queryClient = useQueryClient()
   const { data: courses } = useQuery({
-    queryKey: ['invitations', AllCourseType.InvitedTo],
+    queryKey: ['courses', AllCourseType.InvitedTo],
     queryFn: () => api.courses.coursesList({ type: AllCourseType.InvitedTo }),
   })
 
   const { mutateAsync: accept } = useMutation({
     mutationFn: (courseId: number) =>
-      api.enrollments.acceptDetail(courseId, profile.id),
+      api.enrollments.acceptPartialUpdate2(courseId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['courses'],
+      })
+    },
   })
 
   const { mutateAsync: decline } = useMutation({
-    mutationFn: (courseId: number) =>
-      api.enrollments.acceptDetail(courseId, profile.id),
+    mutationFn: (courseId: number) => api.enrollments.declineDelete2(courseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['courses'],
+      })
+    },
   })
 
   if (!profile) return null
@@ -76,16 +86,24 @@ export const Header = () => {
               Zaproszenia do kursów
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {(courses || []).map((invitation) => (
+            {(courses || []).map((course) => (
               <DropdownMenuLabel
-                key={invitation.id}
+                key={course.id}
                 className="flex flex-row gap-2 items-center"
               >
-                <span className="text-sm font-normal">{invitation.name} </span>
-                <Button size="icon" variant="ghost">
+                <span className="text-sm font-normal">{course.name} </span>
+                <Button
+                  onClick={() => course?.id && accept(course.id)}
+                  size="icon"
+                  variant="ghost"
+                >
                   <Check className="size-4" />
                 </Button>
-                <Button size="icon" variant="ghost">
+                <Button
+                  onClick={() => course?.id && decline(course.id)}
+                  size="icon"
+                  variant="ghost"
+                >
                   <X className="size-4" />
                 </Button>
               </DropdownMenuLabel>
@@ -125,6 +143,9 @@ export const Header = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-normal">
+              Role: {profile.role}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <Link to="/logout">
               <DropdownMenuItem>Logout</DropdownMenuItem>
