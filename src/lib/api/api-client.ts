@@ -9,12 +9,13 @@
  * ---------------------------------------------------------------
  */
 
-import axios, {
-  type AxiosInstance,
-  type AxiosRequestConfig,
-  type HeadersDefaults,
-  type ResponseType,
-} from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type HeadersDefaults, type ResponseType } from 'axios'
+
+export enum AllCourseType {
+  All = 'All',
+  User = 'User',
+  InvitedTo = 'InvitedTo',
+}
 
 export interface CourseDTO {
   /** @format int32 */
@@ -23,35 +24,59 @@ export interface CourseDTO {
   description?: string | null
 }
 
-export interface DateOnly {
+export interface CourseInfoDTO {
   /** @format int32 */
-  year?: number
-  /** @format int32 */
-  month?: number
-  /** @format int32 */
-  day?: number
-  dayOfWeek?: DayOfWeek
-  /** @format int32 */
-  dayOfYear?: number
-  /** @format int32 */
-  dayNumber?: number
+  id?: number
+  name?: string | null
+  description?: string | null
+  students?: CourseStudentDto[] | null
+  user?: UserDTO
+  exercises?: InfoExerciseDTO[] | null
 }
 
-/** @format int32 */
-export enum DayOfWeek {
-  Value0 = 0,
-  Value1 = 1,
-  Value2 = 2,
-  Value3 = 3,
-  Value4 = 4,
-  Value5 = 5,
-  Value6 = 6,
+export interface CourseListItemDTO {
+  /** @format int32 */
+  id?: number
+  name?: string | null
+  description?: string | null
+  enrolled?: boolean
+  invitedTo?: boolean
+  inCourse?: boolean
+  user?: UserDTO
+  exercises?: InfoExerciseDTO[] | null
+}
+
+export interface CourseStudentDto {
+  /** @format int32 */
+  id?: number
+  name?: string | null
+  surname?: string | null
+  username?: string | null
+  adminDecision?: boolean
+  userDecision?: boolean
 }
 
 export interface EditExerciseDTO {
   exerciseName?: string | null
   exerciseDescription?: string | null
   deadLine?: string | null
+}
+
+export interface InfoExerciseDTO {
+  /** @format int32 */
+  courseId?: number
+  /** @format int32 */
+  exerciseId?: number
+  exerciseName?: string | null
+  exerciseDescription?: string | null
+  deadLine?: string | null
+  fileUpload?: InfoFileDTO
+}
+
+export interface InfoFileDTO {
+  /** @format int32 */
+  id?: number
+  fileName?: string | null
 }
 
 export interface RegisterDTO {
@@ -63,24 +88,22 @@ export interface RegisterDTO {
   roleId?: number
 }
 
+export interface UserDTO {
+  /** @format int32 */
+  id?: number
+  name?: string | null
+  surname?: string | null
+  username?: string | null
+}
+
 export interface UserLoginDTO {
   username?: string | null
   password?: string | null
 }
 
-export interface WeatherForecast {
-  date?: DateOnly
-  /** @format int32 */
-  temperatureC?: number
-  /** @format int32 */
-  temperatureF?: number
-  summary?: string | null
-}
-
 export type QueryParamsType = Record<string | number, any>
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, 'data' | 'params' | 'url' | 'responseType'> {
+export interface FullRequestParams extends Omit<AxiosRequestConfig, 'data' | 'params' | 'url' | 'responseType'> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean
   /** request path */
@@ -95,13 +118,9 @@ export interface FullRequestParams
   body?: unknown
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  'body' | 'method' | 'query' | 'path'
->
+export type RequestParams = Omit<FullRequestParams, 'body' | 'method' | 'query' | 'path'>
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, 'data' | 'cancelToken'> {
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, 'data' | 'cancelToken'> {
   securityWorker?: (
     securityData: SecurityDataType | null
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void
@@ -123,16 +142,8 @@ export class HttpClient<SecurityDataType = unknown> {
   private secure?: boolean
   private format?: ResponseType
 
-  constructor({
-    securityWorker,
-    secure,
-    format,
-    ...axiosConfig
-  }: ApiConfig<SecurityDataType> = {}) {
-    this.instance = axios.create({
-      ...axiosConfig,
-      baseURL: axiosConfig.baseURL || '',
-    })
+  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || '' })
     this.secure = secure
     this.format = format
     this.securityWorker = securityWorker
@@ -142,10 +153,7 @@ export class HttpClient<SecurityDataType = unknown> {
     this.securityData = data
   }
 
-  protected mergeRequestParams(
-    params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig
-  ): AxiosRequestConfig {
+  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method)
 
     return {
@@ -153,11 +161,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method &&
-          this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
-          ]) ||
-          {}),
+        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
@@ -175,30 +179,20 @@ export class HttpClient<SecurityDataType = unknown> {
   protected createFormData(input: Record<string, unknown>): FormData {
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key]
-      const propertyContent: any[] =
-        property instanceof Array ? property : [property]
+      const propertyContent: any[] = property instanceof Array ? property : [property]
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File
-        formData.append(
-          key,
-          isFileType ? formItem : this.stringifyFormItem(formItem)
-        )
+        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem))
       }
 
       return formData
     }, new FormData())
   }
 
-  public request = async <T = any, _E = any>({
-    secure,
-    path,
-    type,
-    query,
-    format,
-    body,
-    ...params
-  }: FullRequestParams): Promise<T> => {
+  public request = async <T = any, _E = any>(
+    { secure, path, type, query, format, body, ...params }: FullRequestParams
+  ): Promise<T> => {
     const secureParams =
       ((typeof secure === 'boolean' ? secure : this.secure) &&
         this.securityWorker &&
@@ -207,21 +201,11 @@ export class HttpClient<SecurityDataType = unknown> {
     const requestParams = this.mergeRequestParams(params, secureParams)
     const responseFormat = format || this.format || undefined
 
-    if (
-      type === ContentType.FormData &&
-      body &&
-      body !== null &&
-      typeof body === 'object'
-    ) {
+    if (type === ContentType.FormData && body && body !== null && typeof body === 'object') {
       body = this.createFormData(body as Record<string, unknown>)
     }
 
-    if (
-      type === ContentType.Text &&
-      body &&
-      body !== null &&
-      typeof body !== 'string'
-    ) {
+    if (type === ContentType.Text && body && body !== null && typeof body !== 'string') {
       body = JSON.stringify(body)
     }
 
@@ -230,9 +214,7 @@ export class HttpClient<SecurityDataType = unknown> {
         ...requestParams,
         headers: {
           ...(requestParams.headers || {}),
-          ...(type && type !== ContentType.FormData
-            ? { 'Content-Type': type }
-            : {}),
+          ...(type && type !== ContentType.FormData ? { 'Content-Type': type } : {}),
         },
         params: query,
         responseType: responseFormat,
@@ -247,21 +229,26 @@ export class HttpClient<SecurityDataType = unknown> {
  * @title OnlyCreateDatabase
  * @version 1.0
  */
-export class Api<
-  SecurityDataType extends unknown,
-> extends HttpClient<SecurityDataType> {
-  course = {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  courses = {
     /**
      * No description
      *
      * @tags Course
-     * @name AllCourseList
-     * @request GET:/Course/AllCourse
+     * @name CoursesList
+     * @request GET:/courses
      */
-    allCourseList: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Course/AllCourse`,
+    coursesList: (
+      query?: {
+        type?: AllCourseType
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<CourseListItemDTO[], any>({
+        path: `/courses`,
         method: 'GET',
+        query: query,
+        format: 'json',
         ...params,
       }),
 
@@ -269,40 +256,12 @@ export class Api<
      * No description
      *
      * @tags Course
-     * @name AllCourseDetail
-     * @request GET:/Course/AllCourse/{userId}
+     * @name CoursesCreate
+     * @request POST:/courses
      */
-    allCourseDetail: (userId: number, params: RequestParams = {}) =>
+    coursesCreate: (data: CourseDTO, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Course/AllCourse/${userId}`,
-        method: 'GET',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Course
-     * @name CourseDetail
-     * @request GET:/Course/{courseId}
-     */
-    courseDetail: (courseId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Course/${courseId}`,
-        method: 'GET',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Course
-     * @name CreateCourseCreate
-     * @request POST:/Course/CreateCourse
-     */
-    createCourseCreate: (data: CourseDTO, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Course/CreateCourse`,
+        path: `/courses`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -313,16 +272,42 @@ export class Api<
      * No description
      *
      * @tags Course
-     * @name EditCoursePartialUpdate
-     * @request PATCH:/Course/EditCourse/{courseId}
+     * @name UserDetail
+     * @request GET:/courses/user/{userId}
      */
-    editCoursePartialUpdate: (
-      courseId: number,
-      data: CourseDTO,
-      params: RequestParams = {}
-    ) =>
+    userDetail: (userId: number, params: RequestParams = {}) =>
+      this.request<CourseInfoDTO[], any>({
+        path: `/courses/user/${userId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Course
+     * @name CoursesDetail
+     * @request GET:/courses/{courseId}
+     */
+    coursesDetail: (courseId: number, params: RequestParams = {}) =>
+      this.request<CourseInfoDTO, any>({
+        path: `/courses/${courseId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Course
+     * @name CoursesPartialUpdate
+     * @request PATCH:/courses/{courseId}
+     */
+    coursesPartialUpdate: (courseId: number, data: CourseDTO, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Course/EditCourse/${courseId}`,
+        path: `/courses/${courseId}`,
         method: 'PATCH',
         body: data,
         type: ContentType.Json,
@@ -333,27 +318,27 @@ export class Api<
      * No description
      *
      * @tags Course
-     * @name DeleteCourseDelete
-     * @request DELETE:/Course/DeleteCourse/{courseId}
+     * @name CoursesDelete
+     * @request DELETE:/courses/{courseId}
      */
-    deleteCourseDelete: (courseId: number, params: RequestParams = {}) =>
+    coursesDelete: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Course/DeleteCourse/${courseId}`,
+        path: `/courses/${courseId}`,
         method: 'DELETE',
         ...params,
       }),
   }
-  enrollment = {
+  enrollments = {
     /**
      * No description
      *
      * @tags Enrollment
-     * @name InCourseDetail
-     * @request GET:/Enrollment/InCourse/{courseId}
+     * @name AcceptDetail
+     * @request GET:/enrollments/{courseId}/accept/{userId}
      */
-    inCourseDetail: (courseId: number, params: RequestParams = {}) =>
+    acceptDetail: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Enrollment/InCourse/${courseId}`,
+        path: `/enrollments/${courseId}/accept/${userId}`,
         method: 'GET',
         ...params,
       }),
@@ -362,12 +347,12 @@ export class Api<
      * No description
      *
      * @tags Enrollment
-     * @name NotInCourseYetDetail
-     * @request GET:/Enrollment/NotInCourseYet/{courseId}
+     * @name DeclineDetail
+     * @request GET:/enrollments/{courseId}/decline/{userId}
      */
-    notInCourseYetDetail: (courseId: number, params: RequestParams = {}) =>
+    declineDetail: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Enrollment/NotInCourseYet/${courseId}`,
+        path: `/enrollments/${courseId}/decline/${userId}`,
         method: 'GET',
         ...params,
       }),
@@ -376,40 +361,12 @@ export class Api<
      * No description
      *
      * @tags Enrollment
-     * @name InvitedCourseList
-     * @request GET:/Enrollment/InvitedCourse
+     * @name JoinCreate
+     * @request POST:/enrollments/{courseId}/join
      */
-    invitedCourseList: (params: RequestParams = {}) =>
+    joinCreate: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Enrollment/InvitedCourse`,
-        method: 'GET',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Enrollment
-     * @name MyCoursesList
-     * @request GET:/Enrollment/MyCourses
-     */
-    myCoursesList: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Enrollment/MyCourses`,
-        method: 'GET',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Enrollment
-     * @name JoinCourseCreate
-     * @request POST:/Enrollment/JoinCourse/{courseId}
-     */
-    joinCourseCreate: (courseId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Enrollment/JoinCourse/${courseId}`,
+        path: `/enrollments/${courseId}/join`,
         method: 'POST',
         ...params,
       }),
@@ -418,19 +375,13 @@ export class Api<
      * No description
      *
      * @tags Enrollment
-     * @name AcceptJoinPartialUpdate
-     * @request PATCH:/Enrollment/AcceptJoin/{courseId}
+     * @name InviteCreate
+     * @request POST:/enrollments/{courseId}/invite/{userId}
      */
-    acceptJoinPartialUpdate: (
-      courseId: number,
-      data: number[],
-      params: RequestParams = {}
-    ) =>
+    inviteCreate: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Enrollment/AcceptJoin/${courseId}`,
-        method: 'PATCH',
-        body: data,
-        type: ContentType.Json,
+        path: `/enrollments/${courseId}/invite/${userId}`,
+        method: 'POST',
         ...params,
       }),
 
@@ -438,19 +389,36 @@ export class Api<
      * No description
      *
      * @tags Enrollment
-     * @name RemoveUserDelete
-     * @request DELETE:/Enrollment/RemoveUser/{courseId}
+     * @name RemoveDelete
+     * @request DELETE:/enrollments/{courseId}/remove/{userId}
      */
-    removeUserDelete: (
+    removeDelete: (
       courseId: number,
-      data: number[],
+      userId: string,
+      query?: {
+        /** @format int32 */
+        usersId?: number
+      },
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/Enrollment/RemoveUser/${courseId}`,
+        path: `/enrollments/${courseId}/remove/${userId}`,
         method: 'DELETE',
-        body: data,
-        type: ContentType.Json,
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Enrollment
+     * @name LeaveDelete
+     * @request DELETE:/enrollments/{courseId}/leave
+     */
+    leaveDelete: (courseId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/enrollments/${courseId}/leave`,
+        method: 'DELETE',
         ...params,
       }),
   }
@@ -557,11 +525,7 @@ export class Api<
      * @name EditExercisePartialUpdate
      * @request PATCH:/Exercise/{exerciseId}/EditExercise
      */
-    editExercisePartialUpdate: (
-      exerciseId: number,
-      data: EditExerciseDTO,
-      params: RequestParams = {}
-    ) =>
+    editExercisePartialUpdate: (exerciseId: number, data: EditExerciseDTO, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/Exercise/${exerciseId}/EditExercise`,
         method: 'PATCH',
@@ -680,36 +644,6 @@ export class Api<
         ...params,
       }),
   }
-  weatherForecast = {
-    /**
-     * No description
-     *
-     * @tags WeatherForecast
-     * @name GetWeatherForecast
-     * @request GET:/WeatherForecast
-     */
-    getWeatherForecast: (params: RequestParams = {}) =>
-      this.request<WeatherForecast[], any>({
-        path: `/WeatherForecast`,
-        method: 'GET',
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags WeatherForecast
-     * @name TestList
-     * @request GET:/WeatherForecast/Test
-     */
-    testList: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/WeatherForecast/Test`,
-        method: 'GET',
-        ...params,
-      }),
-  }
   file = {
     /**
      * No description
@@ -730,6 +664,35 @@ export class Api<
         method: 'POST',
         body: data,
         type: ContentType.FormData,
+        ...params,
+      }),
+  }
+  weatherForecast = {
+    /**
+     * No description
+     *
+     * @tags WeatherForecast
+     * @name TestCreate
+     * @request POST:/WeatherForecast/Test
+     */
+    testCreate: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/WeatherForecast/Test`,
+        method: 'POST',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags WeatherForecast
+     * @name InsertToDatabaseCreate
+     * @request POST:/WeatherForecast/InsertToDatabase
+     */
+    insertToDatabaseCreate: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/WeatherForecast/InsertToDatabase`,
+        method: 'POST',
         ...params,
       }),
   }

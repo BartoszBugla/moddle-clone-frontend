@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Check, CheckCircle, CircleUser, Menu, X } from 'lucide-react'
 
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
   Sheet,
 } from '@/components/ui'
-import { api } from '@/lib/api'
+import { AllCourseType, api } from '@/lib/api'
 import { useAuth } from '@/lib/store/auth'
 import { Button } from '../ui/button'
 import { SheetContent, SheetTrigger } from '../ui/sheet'
@@ -30,14 +30,20 @@ const myInvitations = [{ id: '1', name: 'Invitation 1' }]
 export const Header = () => {
   const profile = useAuth((state) => state.accessTokenPayload)
 
-  const { data } = useQuery({
-    queryKey: ['my-invitations'],
-    queryFn: api.enrollment.invitedCourseList,
+  const { data: courses } = useQuery({
+    queryKey: ['invitations', AllCourseType.InvitedTo],
+    queryFn: () => api.courses.coursesList({ type: AllCourseType.InvitedTo }),
   })
 
-  // const { mutateAsync } = useMutation({
-  //   mutationFn: api,
-  // })
+  const { mutateAsync: accept } = useMutation({
+    mutationFn: (courseId: number) =>
+      api.enrollments.acceptDetail(courseId, profile.id),
+  })
+
+  const { mutateAsync: decline } = useMutation({
+    mutationFn: (courseId: number) =>
+      api.enrollments.acceptDetail(courseId, profile.id),
+  })
 
   if (!profile) return null
 
@@ -56,22 +62,26 @@ export const Header = () => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2">
-              Invitations {`(${(data || []).length})`}
+              Invitations {`(${(courses || []).length})`}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {(data || []).length === 0 && (
+            {(courses || []).length === 0 && (
               <DropdownMenuLabel className="flex flex-row gap-2 items-center">
                 <span className="text-sm font-normal">No new invitations</span>
                 <CheckCircle className="size-4" />
               </DropdownMenuLabel>
             )}
-            {(data || []).map((invitation: any) => (
+            <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">
+              Zaproszenia do kursów
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {(courses || []).map((invitation) => (
               <DropdownMenuLabel
                 key={invitation.id}
                 className="flex flex-row gap-2 items-center"
               >
-                <span className="text-sm font-normal">My Account </span>
+                <span className="text-sm font-normal">{invitation.name} </span>
                 <Button size="icon" variant="ghost">
                   <Check className="size-4" />
                 </Button>

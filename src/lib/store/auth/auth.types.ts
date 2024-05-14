@@ -3,6 +3,7 @@ import { JwtPayload } from 'jwt-decode'
 export interface AccessTokenPayload extends JwtPayload {
   role: string
   name: string
+  id: string
 }
 
 export interface AuthState {

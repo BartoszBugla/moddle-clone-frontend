@@ -56,7 +56,7 @@ export function CreateCourse() {
   const errorHandler = useErrorHandler()
   const navigate = useNavigate()
   const { mutateAsync: createCourse } = useMutation({
-    mutationFn: (data: CourseDTO) => api.course.createCourseCreate(data),
+    mutationFn: (data: CourseDTO) => api.courses.coursesCreate(data),
     onSuccess: () => navigate({ to: '/dashboard' }),
     onError: (err) => errorHandler(err, { notify: true }),
   })

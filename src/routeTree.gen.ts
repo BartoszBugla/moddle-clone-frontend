@@ -18,6 +18,7 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProtectedDashboardImport } from './routes/_protected/dashboard'
 import { Route as AuthLogoutImport } from './routes/_auth/logout'
+import { Route as ProtectedExerciseIdImport } from './routes/_protected/exercise/$id'
 
 // Create Virtual Routes
 
@@ -74,6 +75,13 @@ const ProtectedCoursesIdLazyRoute = ProtectedCoursesIdLazyImport.update({
   import('./routes/_protected/courses/$id.lazy').then((d) => d.Route),
 )
 
+const ProtectedExerciseIdRoute = ProtectedExerciseIdImport.update({
+  path: '/exercise/$id',
+  getParentRoute: () => ProtectedRoute,
+} as any).lazy(() =>
+  import('./routes/_protected/exercise/$id.lazy').then((d) => d.Route),
+)
+
 const ProtectedCoursesManageIdLazyRoute =
   ProtectedCoursesManageIdLazyImport.update({
     path: '/courses/manage/$id',
@@ -114,6 +122,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpLazyImport
       parentRoute: typeof AuthImport
     }
+    '/_protected/exercise/$id': {
+      preLoaderRoute: typeof ProtectedExerciseIdImport
+      parentRoute: typeof ProtectedImport
+    }
     '/_protected/courses/$id': {
       preLoaderRoute: typeof ProtectedCoursesIdLazyImport
       parentRoute: typeof ProtectedImport
@@ -136,6 +148,7 @@ export const routeTree = rootRoute.addChildren([
   ]),
   ProtectedRoute.addChildren([
     ProtectedDashboardRoute,
+    ProtectedExerciseIdRoute,
     ProtectedCoursesIdLazyRoute,
     ProtectedCoursesManageIdLazyRoute,
   ]),

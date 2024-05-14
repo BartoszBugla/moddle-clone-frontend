@@ -14,7 +14,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  FormField,
 } from '@/components/ui'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { api } from '@/lib/api'
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { useAuth } from '@/lib/store/auth'
@@ -29,6 +31,7 @@ const schema = z.object({
   password: z.string().min(8).max(40),
   name: z.string().min(1).max(40),
   surname: z.string().min(1).max(40),
+  roleId: z.literal('0').or(z.literal('1')),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -57,6 +60,7 @@ export function SignUp() {
       password: '',
       name: '',
       surname: '',
+      roleId: '0',
     },
     resolver: zodResolver(schema),
   })
@@ -67,7 +71,7 @@ export function SignUp() {
       surname: values.surname,
       password: values.password,
       username: values.username,
-      roleId: 0, // teacher 1 is for user,
+      roleId: Number(values.roleId), // teacher 1 is for user,
     })
 
     const token = (await mutateSignIn(values)) as unknown as string
@@ -95,6 +99,21 @@ export function SignUp() {
 
           <FormInput label="Username" name="username" />
           <FormInput label="Password" name="password" type="password" />
+          <FormField
+            name="roleId"
+            control={formProps.control}
+            render={({ field }) => (
+              <ToggleGroup
+                onValueChange={(value) => field.onChange(value)}
+                {...field}
+                type="single"
+                variant={'outline'}
+              >
+                <ToggleGroupItem value={'0'}>Teacher</ToggleGroupItem>
+                <ToggleGroupItem value={'1'}>Student</ToggleGroupItem>
+              </ToggleGroup>
+            )}
+          ></FormField>
         </CardContent>
         {error && (
           <p className="text-sm text-destructive p-6 pt-0">

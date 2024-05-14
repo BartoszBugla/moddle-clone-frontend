@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { api, CourseDTO } from '@/lib/api'
+import { AllCourseType, api, CourseDTO, CourseListItemDTO } from '@/lib/api'
 import { UserRole } from '@/lib/api/enums/user-role'
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { useAuth } from '@/lib/store/auth'
@@ -27,52 +27,50 @@ export const Route = createFileRoute('/_protected/dashboard')({
 })
 
 export interface CourseCardProps {
-  course: CourseDTO & { user: { name: string; surname: string } }
-  inCourse?: boolean
+  course: CourseListItemDTO
 }
 
-export const CourseCard = ({ course, inCourse }: CourseCardProps) => {
+export const CourseCard = ({ course }: CourseCardProps) => {
   const errorHandler = useErrorHandler()
+
   const { mutateAsync: enroll } = useMutation({
-    mutationFn: () => api.enrollment.joinCourseCreate(course.id || 0),
+    mutationFn: () => api.enrollments.joinCreate(course.id || 0),
 
     onSuccess: () => {
       toast.success('Enrolled successfully')
     },
+
     onError: (err) => {
       errorHandler(err, { notify: true })
     },
   })
 
   return (
-    <Link
-      disabled={!inCourse}
-      to="/courses/$id"
-      params={{ id: (course?.id || 1).toString() }}
-      className={cn({ 'cursor-pointer': inCourse })}
-    >
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className=" text-xl font-medium">{course.name}</CardTitle>
-          {!inCourse && (
-            <Button
-              disabled={!course.id}
-              onClick={() => enroll()}
-              className="text-xs"
-            >
-              Enroll
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm line-clamp-3">{course.description}</div>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex h-auto flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className=" text-xl font-medium">{course.name}</CardTitle>
+        {/* TODO */}
+        {/* {!inCourse && (
+          <Button
+            disabled={!course.id}
+            onClick={() => enroll()}
+            className="text-xs"
+          >
+            Enroll
+          </Button>
+        )} */}
+      </CardHeader>
+      <CardContent className="h-full flex flex-col justify-between">
+        <div className="text-sm line-clamp-3 min-h-6">
+          {course.description || 'No description'}
+        </div>
 
-          <p className="text-xs text-muted-foreground">
-            Teacher: {course.user.name} {course.user.surname}
-          </p>
-        </CardContent>
-      </Card>
-    </Link>
+        <p className="text-xs text-muted-foreground pt-2">
+          Teacher: {course?.user?.name} {course?.user?.surname} (
+          {course?.user?.username})
+        </p>
+      </CardContent>
+    </Card>
   )
 }
 export function Dashboard() {
@@ -80,21 +78,14 @@ export function Dashboard() {
   const formProps = useForm({
     defaultValues: {
       search: '',
-      type: 'all',
+      type: AllCourseType.All,
     },
   })
 
-  const { data: myCourses } = useQuery({
-    queryKey: ['all-courses'],
-    queryFn: () => api.enrollment.myCoursesList() as unknown as CourseDTO[],
+  const { data: courses } = useQuery({
+    queryKey: ['courses', formProps.watch('type')],
+    queryFn: () => api.courses.coursesList({ type: formProps.watch('type') }),
   })
-
-  const { data: allCourses } = useQuery({
-    queryKey: ['my-courses'],
-    queryFn: () => api.course.allCourseList() as unknown as CourseDTO[],
-  })
-
-  const courses = formProps.watch('type') === 'all' ? allCourses : myCourses
 
   return (
     <div className="flex flex-col flex-1 h-full">
@@ -110,11 +101,11 @@ export function Dashboard() {
             name="type"
             options={[
               {
-                value: 'all',
+                value: AllCourseType.All,
                 label: 'All courses',
               },
               {
-                value: 'my-courses',
+                value: AllCourseType.User,
                 label: 'My courses',
               },
             ]}
@@ -140,11 +131,14 @@ export function Dashboard() {
         <div className="size-full dark:bg-muted/20 bg-muted flex-1 h-full">
           <div className="flex-col gap-4 flex w-full p-4 max-w-[800px] mx-auto pt-2 ">
             {(courses || []).map((course, idx) => (
-              <CourseCard
+              <Link
                 key={idx}
-                course={course as any}
-                inCourse={formProps.watch('type') === 'my-courses'}
-              />
+                to="/courses/$id"
+                params={{ id: (course?.id || 1).toString() }}
+                className={cn('cursor-pointer')}
+              >
+                <CourseCard key={idx} course={course} />
+              </Link>
             ))}
           </div>
         </div>
