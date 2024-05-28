@@ -7,14 +7,8 @@ import Form from '@/components/forms/form'
 import { FormInput } from '@/components/forms/form-input'
 import { FormTextarea } from '@/components/forms/form-textarea'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { useCourse } from '@/lib/api/hooks/course'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useCourse, useDeleteCourse } from '@/lib/api/hooks/course'
 import {
   ManageCourseFormField,
   useCourseForm,
@@ -36,6 +30,8 @@ function ManageCourse() {
       [courseData]
     )
   )
+
+  const { mutateAsync: deleteCourse } = useDeleteCourse()
 
   return (
     <Layout>
@@ -70,6 +66,13 @@ function ManageCourse() {
             </div>
           </div>
           <div className="items-center gap-2 flex mt-5">
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => deleteCourse(Number(id))}
+            >
+              Delete Course
+            </Button>
             <Button
               onClick={() => formProps.reset()}
               variant="outline"

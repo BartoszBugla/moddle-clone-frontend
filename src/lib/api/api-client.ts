@@ -66,8 +66,6 @@ export interface CreateExerciseDTO {
 
 export interface CreateGradeDTO {
   /** @format int32 */
-  exerciseId?: number
-  /** @format int32 */
   studentId?: number
   /** @format int32 */
   grade?: number
@@ -329,11 +327,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/courses
      */
     coursesCreate: (data: CourseDTO, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<number, any>({
         path: `/courses`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
+        format: 'json',
         ...params,
       }),
 

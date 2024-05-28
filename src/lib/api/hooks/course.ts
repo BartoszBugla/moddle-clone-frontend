@@ -53,15 +53,31 @@ export const useKickUserFromCourse = (id: number) => {
 }
 
 export const useCreateCourse = (
-  options?: UseMutationOptions<void, unknown, CourseDTO>
+  options?: UseMutationOptions<number, unknown, CourseDTO>
 ) => {
   const queryClient = useQueryClient()
   const errorHandler = useErrorHandler()
+
   return useMutation({
     ...options,
     mutationFn: (data: CourseDTO) => api.courses.coursesCreate(data),
-    onSuccess: (dta) => {
+    onSuccess: (...vars) => {
       queryClient.invalidateQueries({ queryKey: ['course'] })
+      options?.onSuccess?.(...vars)
+    },
+    onError: (err) => errorHandler(err, { notify: true }),
+  })
+}
+
+export const useDeleteCourse = () => {
+  const queryClient = useQueryClient()
+  const errorHandler = useErrorHandler()
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: (id: number) => api.courses.coursesDelete(id),
+    onSuccess: () => {
+      navigate({ to: '/dashboard' })
     },
     onError: (err) => errorHandler(err, { notify: true }),
   })

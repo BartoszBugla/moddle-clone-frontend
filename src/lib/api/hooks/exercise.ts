@@ -11,7 +11,6 @@ import {
   CreateExerciseDTO,
   CreateGradeDTO,
   EditExerciseDTO,
-  ExerciseDTO,
 } from '../api-client'
 
 export const useCreateExercise = (

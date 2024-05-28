@@ -76,17 +76,6 @@ export function ExercisePage() {
       <Card>
         <CardHeader className="justify-between flex flex-row">
           <CardTitle>{data?.exerciseName}</CardTitle>
-          <div>
-            <Link
-              to="/exercise/edit/$exerciseId"
-              params={{
-                exerciseId,
-              }}
-              className={cn(buttonVariants({ variant: 'outline' }))}
-            >
-              Edit
-            </Link>
-          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 h-auto">
           <h4>Until: </h4>

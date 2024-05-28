@@ -100,7 +100,7 @@ export function ExercisePageTeacher() {
                   ({ userId }) => userId === student.id
                 )
 
-                const isSubmitted = true
+                const isSubmitted = !!item?.fileUploadUrl
 
                 return (
                   <div className="flex flex-col gap-2">
