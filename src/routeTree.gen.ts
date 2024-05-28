@@ -18,18 +18,18 @@ import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProtectedDashboardImport } from './routes/_protected/dashboard'
 import { Route as AuthLogoutImport } from './routes/_auth/logout'
-import { Route as ProtectedExerciseIdImport } from './routes/_protected/exercise/$id'
+import { Route as ProtectedExerciseExerciseIdImport } from './routes/_protected/exercise/$exerciseId'
+import { Route as ProtectedCoursesCreateImport } from './routes/_protected/courses/create'
+import { Route as ProtectedCoursesIdImport } from './routes/_protected/courses/$id'
+import { Route as ProtectedExerciseTeacherExerciseIdImport } from './routes/_protected/exercise/teacher.$exerciseId'
+import { Route as ProtectedExerciseEditExerciseIdImport } from './routes/_protected/exercise/edit.$exerciseId'
+import { Route as ProtectedExerciseCreateCourseIdImport } from './routes/_protected/exercise/create.$courseId'
+import { Route as ProtectedCoursesEditIdImport } from './routes/_protected/courses/edit.$id'
 
 // Create Virtual Routes
 
 const AuthSignUpLazyImport = createFileRoute('/_auth/sign-up')()
 const AuthSignInLazyImport = createFileRoute('/_auth/sign-in')()
-const ProtectedCoursesIdLazyImport = createFileRoute(
-  '/_protected/courses/$id',
-)()
-const ProtectedCoursesManageIdLazyImport = createFileRoute(
-  '/_protected/courses/manage/$id',
-)()
 
 // Create/Update Routes
 
@@ -68,27 +68,44 @@ const AuthLogoutRoute = AuthLogoutImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
-const ProtectedCoursesIdLazyRoute = ProtectedCoursesIdLazyImport.update({
+const ProtectedExerciseExerciseIdRoute =
+  ProtectedExerciseExerciseIdImport.update({
+    path: '/exercise/$exerciseId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+
+const ProtectedCoursesCreateRoute = ProtectedCoursesCreateImport.update({
+  path: '/courses/create',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+
+const ProtectedCoursesIdRoute = ProtectedCoursesIdImport.update({
   path: '/courses/$id',
   getParentRoute: () => ProtectedRoute,
-} as any).lazy(() =>
-  import('./routes/_protected/courses/$id.lazy').then((d) => d.Route),
-)
+} as any)
 
-const ProtectedExerciseIdRoute = ProtectedExerciseIdImport.update({
-  path: '/exercise/$id',
-  getParentRoute: () => ProtectedRoute,
-} as any).lazy(() =>
-  import('./routes/_protected/exercise/$id.lazy').then((d) => d.Route),
-)
-
-const ProtectedCoursesManageIdLazyRoute =
-  ProtectedCoursesManageIdLazyImport.update({
-    path: '/courses/manage/$id',
+const ProtectedExerciseTeacherExerciseIdRoute =
+  ProtectedExerciseTeacherExerciseIdImport.update({
+    path: '/exercise/teacher/$exerciseId',
     getParentRoute: () => ProtectedRoute,
-  } as any).lazy(() =>
-    import('./routes/_protected/courses/manage/$id.lazy').then((d) => d.Route),
-  )
+  } as any)
+
+const ProtectedExerciseEditExerciseIdRoute =
+  ProtectedExerciseEditExerciseIdImport.update({
+    path: '/exercise/edit/$exerciseId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+
+const ProtectedExerciseCreateCourseIdRoute =
+  ProtectedExerciseCreateCourseIdImport.update({
+    path: '/exercise/create/$courseId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+
+const ProtectedCoursesEditIdRoute = ProtectedCoursesEditIdImport.update({
+  path: '/courses/edit/$id',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -122,16 +139,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpLazyImport
       parentRoute: typeof AuthImport
     }
-    '/_protected/exercise/$id': {
-      preLoaderRoute: typeof ProtectedExerciseIdImport
-      parentRoute: typeof ProtectedImport
-    }
     '/_protected/courses/$id': {
-      preLoaderRoute: typeof ProtectedCoursesIdLazyImport
+      preLoaderRoute: typeof ProtectedCoursesIdImport
       parentRoute: typeof ProtectedImport
     }
-    '/_protected/courses/manage/$id': {
-      preLoaderRoute: typeof ProtectedCoursesManageIdLazyImport
+    '/_protected/courses/create': {
+      preLoaderRoute: typeof ProtectedCoursesCreateImport
+      parentRoute: typeof ProtectedImport
+    }
+    '/_protected/exercise/$exerciseId': {
+      preLoaderRoute: typeof ProtectedExerciseExerciseIdImport
+      parentRoute: typeof ProtectedImport
+    }
+    '/_protected/courses/edit/$id': {
+      preLoaderRoute: typeof ProtectedCoursesEditIdImport
+      parentRoute: typeof ProtectedImport
+    }
+    '/_protected/exercise/create/$courseId': {
+      preLoaderRoute: typeof ProtectedExerciseCreateCourseIdImport
+      parentRoute: typeof ProtectedImport
+    }
+    '/_protected/exercise/edit/$exerciseId': {
+      preLoaderRoute: typeof ProtectedExerciseEditExerciseIdImport
+      parentRoute: typeof ProtectedImport
+    }
+    '/_protected/exercise/teacher/$exerciseId': {
+      preLoaderRoute: typeof ProtectedExerciseTeacherExerciseIdImport
       parentRoute: typeof ProtectedImport
     }
   }
@@ -148,9 +181,13 @@ export const routeTree = rootRoute.addChildren([
   ]),
   ProtectedRoute.addChildren([
     ProtectedDashboardRoute,
-    ProtectedExerciseIdRoute,
-    ProtectedCoursesIdLazyRoute,
-    ProtectedCoursesManageIdLazyRoute,
+    ProtectedCoursesIdRoute,
+    ProtectedCoursesCreateRoute,
+    ProtectedExerciseExerciseIdRoute,
+    ProtectedCoursesEditIdRoute,
+    ProtectedExerciseCreateCourseIdRoute,
+    ProtectedExerciseEditExerciseIdRoute,
+    ProtectedExerciseTeacherExerciseIdRoute,
   ]),
 ])
 

@@ -12,6 +12,10 @@ import { Button, buttonVariants } from '@/components/ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AllCourseType, api, CourseListItemDTO } from '@/lib/api'
 import { UserRole } from '@/lib/api/enums/user-role'
+import {
+  EnrollmentStatus,
+  getEnrollmentStatus,
+} from '@/lib/common/utils/get-enrollment-status'
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { useAuth } from '@/lib/store/auth'
 import { cn } from '@/lib/utils'
@@ -27,6 +31,8 @@ export interface CourseCardProps {
 export const CourseCard = ({ course }: CourseCardProps) => {
   const errorHandler = useErrorHandler()
   const queryClient = useQueryClient()
+  const status = getEnrollmentStatus(course.adminDecision, course.userDecision)
+
   const { mutateAsync: enroll } = useMutation({
     mutationFn: () => api.enrollments.joinCreate(course.id || 0),
 
@@ -40,18 +46,24 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     },
   })
 
+  const buttonTextMap = {
+    [EnrollmentStatus.InvitedTo]: 'Enroll',
+    [EnrollmentStatus.Requested]: 'Waiting for approval',
+    [EnrollmentStatus.CanEnroll]: 'Enroll',
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex h-auto flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className=" text-xl font-medium">{course.name}</CardTitle>
 
-        {!course.inCourse && (
+        {EnrollmentStatus.InCourse !== status && (
           <Button
-            disabled={course.enrolled && !course.inCourse}
+            disabled={status === EnrollmentStatus.Requested}
             onClick={() => enroll()}
             className="text-xs"
           >
-            Enroll
+            {buttonTextMap[status]}
           </Button>
         )}
       </CardHeader>
@@ -68,6 +80,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     </Card>
   )
 }
+
 export function Dashboard() {
   const tokenPayload = useAuth((state) => state.accessTokenPayload)
   const formProps = useForm({
@@ -117,8 +130,7 @@ export function Dashboard() {
                 buttonVariants({ variant: 'outline' }),
                 'flex flex-row gap-2 pt-2'
               )}
-              to="/courses/manage/$id"
-              params={{ id: 'new' }}
+              to="/courses/create"
             >
               <span>Add new</span>
               <PlusIcon className="size-5" />
@@ -131,12 +143,12 @@ export function Dashboard() {
           <div className="flex-col gap-4 flex w-full p-4 max-w-[800px] mx-auto pt-2 ">
             {(courses || []).map((course, idx) => (
               <Link
-                disabled={!course.inCourse}
+                disabled={!course.adminDecision}
                 key={idx}
                 to="/courses/$id"
                 params={{ id: (course?.id || 1).toString() }}
                 className={cn('transition', {
-                  'cursor-pointer hover:brightness-95 ': !course.inCourse,
+                  'cursor-pointer hover:brightness-95': false,
                 })}
               >
                 <CourseCard key={idx} course={course} />

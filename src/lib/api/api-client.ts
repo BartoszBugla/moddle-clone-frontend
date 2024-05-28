@@ -44,9 +44,6 @@ export interface CourseListItemDTO {
   userDecision?: boolean
   user?: UserDTO
   exercises?: InfoExerciseDTO[] | null
-  enrolled?: boolean
-  inCourse?: boolean
-  invitedTo?: boolean
 }
 
 export interface CourseStudentDto {
@@ -59,10 +56,68 @@ export interface CourseStudentDto {
   userDecision?: boolean
 }
 
-export interface EditExerciseDTO {
+export interface CreateExerciseDTO {
+  /** @format int32 */
+  courseId?: number
   exerciseName?: string | null
   exerciseDescription?: string | null
   deadLine?: string | null
+}
+
+export interface CreateGradeDTO {
+  /** @format int32 */
+  exerciseId?: number
+  /** @format int32 */
+  studentId?: number
+  /** @format int32 */
+  grade?: number
+  comment?: string | null
+}
+
+export interface EditExerciseDTO {
+  /** @format int32 */
+  courseId?: number
+  exerciseName?: string | null
+  exerciseDescription?: string | null
+  deadLine?: string | null
+}
+
+export interface ExerciseDTO {
+  /** @format int32 */
+  id?: number
+  /** @format int32 */
+  courseId?: number
+  exerciseName?: string | null
+  exerciseDescription?: string | null
+  deadLine?: string | null
+  /** @format binary */
+  file?: File | null
+}
+
+export interface GradeDTO {
+  /** @format int32 */
+  userId?: number
+  /** @format int32 */
+  exerciseId?: number
+  studentComment?: string | null
+  teacherComment?: string | null
+  /** @format int32 */
+  gradePercentage?: number | null
+  /** @format date-time */
+  postDate?: string
+  /** @format int32 */
+  fileUploadUrl?: number | null
+}
+
+export interface GradedExerciseDTO {
+  /** @format int32 */
+  id?: number
+  /** @format int32 */
+  courseId?: number
+  exerciseName?: string | null
+  exerciseDescription?: string | null
+  deadLine?: string | null
+  grade?: GradeDTO
 }
 
 export interface InfoExerciseDTO {
@@ -89,6 +144,17 @@ export interface RegisterDTO {
   password?: string | null
   /** @format int32 */
   roleId?: number
+}
+
+export interface TeacherGradedExerciseDTO {
+  /** @format int32 */
+  id?: number
+  /** @format int32 */
+  courseId?: number
+  exerciseName?: string | null
+  exerciseDescription?: string | null
+  deadLine?: string | null
+  grades?: GradeDTO[] | null
 }
 
 export interface UserDTO {
@@ -426,13 +492,16 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Exercise
-     * @name AllExerciseInCourseDetail
-     * @request GET:/Exercise/{courseId}/AllExerciseInCourse
+     * @name ExerciseCreate
+     * @request POST:/exercise
      */
-    allExerciseInCourseDetail: (courseId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Exercise/${courseId}/AllExerciseInCourse`,
-        method: 'GET',
+    exerciseCreate: (data: CreateExerciseDTO, params: RequestParams = {}) =>
+      this.request<ExerciseDTO, any>({
+        path: `/exercise`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
         ...params,
       }),
 
@@ -441,12 +510,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Exercise
      * @name ExerciseDetail
-     * @request GET:/Exercise/{exerciseId}
+     * @request GET:/exercise/{exerciseId}
      */
     exerciseDetail: (exerciseId: number, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Exercise/${exerciseId}`,
+      this.request<GradedExerciseDTO, any>({
+        path: `/exercise/${exerciseId}`,
         method: 'GET',
+        format: 'json',
         ...params,
       }),
 
@@ -454,13 +524,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Exercise
-     * @name FileDetail
-     * @request GET:/Exercise/{exerciseId}/File
+     * @name ExerciseDelete
+     * @request DELETE:/exercise/{exerciseId}
      */
-    fileDetail: (exerciseId: number, params: RequestParams = {}) =>
+    exerciseDelete: (exerciseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Exercise/${exerciseId}/File`,
-        method: 'GET',
+        path: `/exercise/${exerciseId}`,
+        method: 'DELETE',
         ...params,
       }),
 
@@ -468,65 +538,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Exercise
-     * @name AddExerciseCreate
-     * @request POST:/Exercise/AddExercise
+     * @name ExercisePartialUpdate
+     * @request PATCH:/exercise/{exerciseId}
      */
-    addExerciseCreate: (
-      data: {
-        /** @format binary */
-        File?: File
-      },
-      query?: {
-        /** @format int32 */
-        CourseId?: number
-        ExerciseName?: string
-        ExerciseDescription?: string
-        DeadLine?: string
-      },
-      params: RequestParams = {}
-    ) =>
+    exercisePartialUpdate: (exerciseId: number, data: EditExerciseDTO, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/Exercise/AddExercise`,
-        method: 'POST',
-        query: query,
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Exercise
-     * @name AddFileToExercisePartialUpdate
-     * @request PATCH:/Exercise/{exerciseId}/AddFileToExercise
-     */
-    addFileToExercisePartialUpdate: (
-      exerciseId: number,
-      data: {
-        /** @format binary */
-        file?: File
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/Exercise/${exerciseId}/AddFileToExercise`,
-        method: 'PATCH',
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Exercise
-     * @name EditExercisePartialUpdate
-     * @request PATCH:/Exercise/{exerciseId}/EditExercise
-     */
-    editExercisePartialUpdate: (exerciseId: number, data: EditExerciseDTO, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/Exercise/${exerciseId}/EditExercise`,
+        path: `/exercise/${exerciseId}`,
         method: 'PATCH',
         body: data,
         type: ContentType.Json,
@@ -537,20 +554,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Exercise
-     * @name DeleteExerciseDelete
-     * @request DELETE:/Exercise/DeleteExercise
+     * @name GradesDetail
+     * @request GET:/exercise/{exerciseId}/grades
      */
-    deleteExerciseDelete: (
-      query?: {
-        /** @format int32 */
-        exerciseId?: number
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/Exercise/DeleteExercise`,
-        method: 'DELETE',
-        query: query,
+    gradesDetail: (exerciseId: number, params: RequestParams = {}) =>
+      this.request<TeacherGradedExerciseDTO, any>({
+        path: `/exercise/${exerciseId}/grades`,
+        method: 'GET',
+        format: 'json',
         ...params,
       }),
 
@@ -558,20 +569,41 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Exercise
-     * @name DeleteFileDelete
-     * @request DELETE:/Exercise/DeleteFile
+     * @name GradeCreate
+     * @request POST:/exercise/{exerciseId}/grade
      */
-    deleteFileDelete: (
-      query?: {
-        /** @format int32 */
-        fileId?: number
+    gradeCreate: (exerciseId: number, data: CreateGradeDTO, params: RequestParams = {}) =>
+      this.request<GradedExerciseDTO, any>({
+        path: `/exercise/${exerciseId}/grade`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Exercise
+     * @name UploadCreate
+     * @request POST:/exercise/{exerciseId}/upload
+     */
+    uploadCreate: (
+      exerciseId: number,
+      data: {
+        comment?: string
+        /** @format binary */
+        file?: File
       },
       params: RequestParams = {}
     ) =>
-      this.request<void, any>({
-        path: `/Exercise/DeleteFile`,
-        method: 'DELETE',
-        query: query,
+      this.request<GradedExerciseDTO, any>({
+        path: `/exercise/${exerciseId}/upload`,
+        method: 'POST',
+        body: data,
+        type: ContentType.FormData,
+        format: 'json',
         ...params,
       }),
   }
