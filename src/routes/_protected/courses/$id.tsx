@@ -78,7 +78,6 @@ function CoursePage() {
               <CardTitle>Student List</CardTitle>
             </CardHeader>
             <CardContent className="h-full">
-              {/* // TODO filter out logged user */}
               <ul className="flex flex-1 flex-col overflow-y-auto max-h-[200px]">
                 {(courseData?.students || [])
                   .filter(({ id }) => id !== courseData?.user?.id)
@@ -107,7 +106,11 @@ function CoursePage() {
                               EnrollmentStatus.InCourse,
                               EnrollmentStatus.InvitedTo,
                             ].includes(status) && (
-                              <Button size="icon" variant="ghost">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => deleteUser(student.id || 0)}
+                              >
                                 <Trash className="text-destructive size-4" />
                               </Button>
                             )}

@@ -24,7 +24,7 @@ export const InviteUserDialog = ({
 }: InviteUserDialogProps) => {
   const queryClient = useQueryClient()
   const profile = useAuth((state) => state.accessTokenPayload)
-  // TODO filter out logged user
+
   const { data: users } = useQuery({
     queryKey: ['users'],
     queryFn: () => api.user.allUsersList(),
@@ -36,7 +36,10 @@ export const InviteUserDialog = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['course', courseId.toString()],
+        queryKey: ['course', Number(courseId)],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['users'],
       })
       toast.success('Invited successfully')
     },
@@ -49,11 +52,7 @@ export const InviteUserDialog = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </DialogDescription>
+          <DialogTitle>Invite users to your course</DialogTitle>
         </DialogHeader>
         <ul className="flex flex-col gap-2 overflow-y-auto max-h-[200px]">
           {(users || [])

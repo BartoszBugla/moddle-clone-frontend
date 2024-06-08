@@ -1,10 +1,13 @@
+import { error } from 'console'
 import {
   useMutation,
   UseMutationOptions,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 
+import { queryClient } from '@/config/query-client'
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { api } from '../api'
 import {
@@ -21,6 +24,9 @@ export const useCreateExercise = (
   return useMutation({
     ...options,
     mutationFn: (data: CreateExerciseDTO) => api.exercise.exerciseCreate(data),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['course', vars.courseId] })
+    },
     onError: (err) => errorHandler(err, { notify: true }),
   })
 }
@@ -83,5 +89,19 @@ export const useCreateGrade = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exercise-teacher'] })
     },
+  })
+}
+export const useDeleteExercise = (
+  options?: UseMutationOptions<unknown, unknown, number>
+) => {
+  const queryClient = useQueryClient()
+  const errorHandler = useErrorHandler()
+  return useMutation({
+    ...options,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercise-teacher'] })
+    },
+    mutationFn: (id: number) => api.exercise.exerciseDelete(id),
+    onError: (err) => errorHandler(err, { notify: true }),
   })
 }

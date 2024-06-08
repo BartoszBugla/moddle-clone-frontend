@@ -25,7 +25,7 @@ export const Route = createFileRoute('/_protected/exercise/create/$courseId')({
 
 export function ExerciseManage() {
   const { courseId } = Route.useParams<{ courseId: string }>()
-  const { formProps, onSubmit } = useExerciseForm()
+  const { formProps, onSubmit } = useExerciseForm(Number(courseId))
 
   return (
     <Layout>

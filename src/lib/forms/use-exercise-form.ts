@@ -17,7 +17,7 @@ export enum ExerciseManageFormField {
 const validationSchema = z.object({
   [ExerciseManageFormField.Name]: z.string().min(1),
   [ExerciseManageFormField.Description]: z.string().min(1),
-  [ExerciseManageFormField.Deadline]: z.string().min(1),
+  [ExerciseManageFormField.Deadline]: z.string(),
 })
 
 export type ExerciseFormValues = z.infer<typeof validationSchema>
@@ -46,13 +46,18 @@ export const useExerciseForm = (
   })
 
   const onSubmit = formProps.handleSubmit((values) => {
-    if (exerciseId)
-      return updateExercise({
+    if (exerciseId) {
+      updateExercise({
         id: exerciseId,
         exerciseName: values.name,
         exerciseDescription: values.description,
         deadLine: new Date(values.deadline).toISOString(),
       })
+
+      navigate({ to: '/exercise/teacher/$exerciseId', params: { courseId } })
+
+      return
+    }
 
     createExercise({
       courseId: Number(courseId),
@@ -60,11 +65,15 @@ export const useExerciseForm = (
       exerciseDescription: values.description,
       deadLine: new Date(values.deadline).toISOString(),
     })
+
+    navigate({ to: '/courses/$courseId', params: { courseId } })
   })
 
   useEffect(() => {
     if (initialValues) formProps.reset(initialValues)
   }, [formProps, initialValues])
+
+  console.log(formProps.watch())
 
   return { formProps, onSubmit }
 }

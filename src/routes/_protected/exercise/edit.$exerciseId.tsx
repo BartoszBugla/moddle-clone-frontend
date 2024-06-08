@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { format } from 'date-fns'
 import { ArrowLeft } from 'lucide-react'
 
 import { Layout } from '@/components/dashboard/layout'
@@ -14,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui'
-import { useGetExercise } from '@/lib/api/hooks/exercise'
+import { useDeleteExercise, useGetExercise } from '@/lib/api/hooks/exercise'
 import {
   ExerciseManageFormField,
   useExerciseForm,
@@ -28,17 +29,23 @@ export const Route = createFileRoute('/_protected/exercise/edit/$exerciseId')({
 export function ExerciseManage() {
   const { exerciseId } = Route.useParams<{ exerciseId: string }>()
   const { data: exercise } = useGetExercise(Number(exerciseId))
+  const { mutateAsync: deleteExercise } = useDeleteExercise()
   const { formProps, onSubmit } = useExerciseForm(
-    undefined,
+    exercise?.courseId,
     Number(exerciseId),
     useMemo(() => {
       return {
         name: exercise?.exerciseName || '',
         description: exercise?.exerciseDescription || '',
-        deadline: exercise?.deadLine || '',
+        deadline: format(
+          exercise?.deadLine || new Date(),
+          "yyyy-MM-dd'T'HH:mm"
+        ),
       }
     }, [exercise])
   )
+
+  const navigate = useNavigate()
 
   return (
     <Layout>
@@ -87,6 +94,19 @@ export function ExerciseManage() {
             </div>
           </div>
           <div className="items-center gap-2 flex mt-5">
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={async () => {
+                await deleteExercise(Number(exerciseId))
+                navigate({
+                  to: '/courses/$id',
+                  params: { id: exercise?.courseId },
+                })
+              }}
+            >
+              Delete Exercise
+            </Button>
             <Button
               onClick={() => formProps.reset()}
               variant="outline"

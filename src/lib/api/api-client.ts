@@ -16,6 +16,7 @@ export enum AllCourseType {
   User = 'User',
   InvitedTo = 'InvitedTo',
   NotUser = 'NotUser',
+  Author = 'Author',
 }
 
 export interface CourseDTO {
@@ -293,8 +294,8 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title OnlyCreateDatabase
- * @version 1.0
+ * @title Moje API
+ * @version v1
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   courses = {
@@ -304,6 +305,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Course
      * @name CoursesList
      * @request GET:/courses
+     * @secure
      */
     coursesList: (
       query?: {
@@ -315,6 +317,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/courses`,
         method: 'GET',
         query: query,
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -325,12 +328,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Course
      * @name CoursesCreate
      * @request POST:/courses
+     * @secure
      */
     coursesCreate: (data: CourseDTO, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/courses`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         format: 'json',
         ...params,
@@ -342,11 +347,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Course
      * @name UserDetail
      * @request GET:/courses/user/{userId}
+     * @secure
      */
     userDetail: (userId: number, params: RequestParams = {}) =>
       this.request<CourseInfoDTO[], any>({
         path: `/courses/user/${userId}`,
         method: 'GET',
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -357,11 +364,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Course
      * @name CoursesDetail
      * @request GET:/courses/{courseId}
+     * @secure
      */
     coursesDetail: (courseId: number, params: RequestParams = {}) =>
       this.request<CourseInfoDTO, any>({
         path: `/courses/${courseId}`,
         method: 'GET',
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -372,12 +381,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Course
      * @name CoursesPartialUpdate
      * @request PATCH:/courses/{courseId}
+     * @secure
      */
     coursesPartialUpdate: (courseId: number, data: CourseDTO, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/courses/${courseId}`,
         method: 'PATCH',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -388,11 +399,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Course
      * @name CoursesDelete
      * @request DELETE:/courses/{courseId}
+     * @secure
      */
     coursesDelete: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/courses/${courseId}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
   }
@@ -403,11 +416,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Enrollment
      * @name AcceptPartialUpdate
      * @request PATCH:/enrollments/{courseId}/accept/{userId}
+     * @secure
      */
     acceptPartialUpdate: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/accept/${userId}`,
         method: 'PATCH',
+        secure: true,
         ...params,
       }),
 
@@ -417,11 +432,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Enrollment
      * @name DeclineDelete
      * @request DELETE:/enrollments/{courseId}/decline/{userId}
+     * @secure
      */
     declineDelete: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/decline/${userId}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -431,11 +448,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Enrollment
      * @name InviteCreate
      * @request POST:/enrollments/{courseId}/invite/{userId}
+     * @secure
      */
     inviteCreate: (courseId: number, userId: number, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/enrollments/${courseId}/invite/${userId}`,
         method: 'POST',
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -446,11 +465,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Enrollment
      * @name JoinCreate
      * @request POST:/enrollments/{courseId}/join
+     * @secure
      */
     joinCreate: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/join`,
         method: 'POST',
+        secure: true,
         ...params,
       }),
 
@@ -462,11 +483,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request DELETE:/enrollments/{courseId}/decline
      * @originalName declineDelete
      * @duplicate
+     * @secure
      */
     declineDelete2: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/decline`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -478,11 +501,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request PATCH:/enrollments/{courseId}/accept
      * @originalName acceptPartialUpdate
      * @duplicate
+     * @secure
      */
     acceptPartialUpdate2: (courseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/enrollments/${courseId}/accept`,
         method: 'PATCH',
+        secure: true,
         ...params,
       }),
   }
@@ -493,12 +518,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name ExerciseCreate
      * @request POST:/exercise
+     * @secure
      */
     exerciseCreate: (data: CreateExerciseDTO, params: RequestParams = {}) =>
       this.request<ExerciseDTO, any>({
         path: `/exercise`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         format: 'json',
         ...params,
@@ -510,11 +537,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name ExerciseDetail
      * @request GET:/exercise/{exerciseId}
+     * @secure
      */
     exerciseDetail: (exerciseId: number, params: RequestParams = {}) =>
       this.request<GradedExerciseDTO, any>({
         path: `/exercise/${exerciseId}`,
         method: 'GET',
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -525,11 +554,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name ExerciseDelete
      * @request DELETE:/exercise/{exerciseId}
+     * @secure
      */
     exerciseDelete: (exerciseId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/exercise/${exerciseId}`,
         method: 'DELETE',
+        secure: true,
         ...params,
       }),
 
@@ -539,12 +570,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name ExercisePartialUpdate
      * @request PATCH:/exercise/{exerciseId}
+     * @secure
      */
     exercisePartialUpdate: (exerciseId: number, data: EditExerciseDTO, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/exercise/${exerciseId}`,
         method: 'PATCH',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -555,11 +588,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name GradesDetail
      * @request GET:/exercise/{exerciseId}/grades
+     * @secure
      */
     gradesDetail: (exerciseId: number, params: RequestParams = {}) =>
       this.request<TeacherGradedExerciseDTO, any>({
         path: `/exercise/${exerciseId}/grades`,
         method: 'GET',
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -570,12 +605,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name GradeCreate
      * @request POST:/exercise/{exerciseId}/grade
+     * @secure
      */
     gradeCreate: (exerciseId: number, data: CreateGradeDTO, params: RequestParams = {}) =>
       this.request<GradedExerciseDTO, any>({
         path: `/exercise/${exerciseId}/grade`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         format: 'json',
         ...params,
@@ -587,6 +624,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags Exercise
      * @name UploadCreate
      * @request POST:/exercise/{exerciseId}/upload
+     * @secure
      */
     uploadCreate: (
       exerciseId: number,
@@ -601,8 +639,39 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/exercise/${exerciseId}/upload`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.FormData,
         format: 'json',
+        ...params,
+      }),
+  }
+  grades = {
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name AddGradeCreate
+     * @request POST:/grades/AddGrade/{exerciseId}
+     * @secure
+     */
+    addGradeCreate: (
+      exerciseId: number,
+      data: {
+        /** @format binary */
+        file?: File
+      },
+      query?: {
+        comment?: string
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/grades/AddGrade/${exerciseId}`,
+        method: 'POST',
+        query: query,
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
         ...params,
       }),
   }
@@ -613,11 +682,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags User
      * @name AllUsersList
      * @request GET:/User/AllUsers
+     * @secure
      */
     allUsersList: (params: RequestParams = {}) =>
       this.request<UserDTO[], any>({
         path: `/User/AllUsers`,
         method: 'GET',
+        secure: true,
         format: 'json',
         ...params,
       }),
@@ -628,12 +699,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags User
      * @name RegisterCreate
      * @request POST:/User/Register
+     * @secure
      */
     registerCreate: (data: RegisterDTO, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/User/Register`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -644,12 +717,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags User
      * @name LoginCreate
      * @request POST:/User/Login
+     * @secure
      */
     loginCreate: (data: UserLoginDTO, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/User/Login`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -660,6 +735,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags User
      * @name DeleteUserDelete
      * @request DELETE:/User/DeleteUser
+     * @secure
      */
     deleteUserDelete: (
       query?: {
@@ -672,6 +748,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/User/DeleteUser`,
         method: 'DELETE',
         query: query,
+        secure: true,
         ...params,
       }),
   }
@@ -682,6 +759,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags WeatherForecast
      * @name UploadCreate
      * @request POST:/File/Upload
+     * @secure
      */
     uploadCreate: (
       data: {
@@ -694,6 +772,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/File/Upload`,
         method: 'POST',
         body: data,
+        secure: true,
         type: ContentType.FormData,
         ...params,
       }),
@@ -705,11 +784,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags WeatherForecast
      * @name TestCreate
      * @request POST:/WeatherForecast/Test
+     * @secure
      */
     testCreate: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/WeatherForecast/Test`,
         method: 'POST',
+        secure: true,
         ...params,
       }),
 
@@ -719,11 +800,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @tags WeatherForecast
      * @name InsertToDatabaseCreate
      * @request POST:/WeatherForecast/InsertToDatabase
+     * @secure
      */
     insertToDatabaseCreate: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/WeatherForecast/InsertToDatabase`,
         method: 'POST',
+        secure: true,
         ...params,
       }),
   }

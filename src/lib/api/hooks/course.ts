@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { api } from '../api'
@@ -47,6 +48,7 @@ export const useKickUserFromCourse = (id: number) => {
       api.enrollments.declineDelete(Number(id), userId),
 
     onSuccess: () => {
+      toast.success('User removed successfully')
       queryClient.invalidateQueries({ queryKey: ['course', id] })
     },
   })

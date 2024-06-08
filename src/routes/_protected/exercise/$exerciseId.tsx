@@ -97,7 +97,10 @@ export function ExercisePage() {
             ) : (
               <div className="flex flex-col gap-2 justify-center items-center rounded-sm">
                 <FileUp />
-                <p>Drag and drop files here.</p>
+                <p>
+                  {' '}
+                  {fileValue ? 'Change file' : 'Drag and drop files here.'}
+                </p>
               </div>
             )}
           </div>

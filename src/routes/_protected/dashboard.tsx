@@ -86,7 +86,7 @@ export function Dashboard() {
   const formProps = useForm({
     defaultValues: {
       search: '',
-      type: AllCourseType.All,
+      type: AllCourseType.User,
     },
   })
 
@@ -104,7 +104,7 @@ export function Dashboard() {
       >
         <div className="flex flex-row gap-2 items-center mx-auto max-w-[600px] w-full">
           {/* <div className="flex-1 h-full"> */}
-          <FormInput className="w-full" name="search" placeholder="Search..." />
+          {/* <FormInput className="w-full" name="search" placeholder="Search..." /> */}
           <FormSelect
             name="type"
             options={[
@@ -119,6 +119,11 @@ export function Dashboard() {
               {
                 value: AllCourseType.NotUser,
                 label: 'Courses to enroll',
+              },
+
+              {
+                value: AllCourseType.Author,
+                label: 'Created by me',
               },
             ]}
           />
