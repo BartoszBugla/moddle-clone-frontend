@@ -29,9 +29,10 @@ export const Deadline = ({ deadline }: DeadlineProps) => {
   const status = getStatus(deadlineDate)
   const formattedDeadline = format(deadlineDate, 'yyyy-MM-dd HH:mm')
 
+  const noStatus = !status.text
   return (
-    <p
-      className={cn('text-sm text-muted-foreground', status?.className)}
-    >{`${formattedDeadline} ${status?.text}`}</p>
+    <p className={cn('text-sm text-muted-foreground', status?.className)}>
+      {noStatus && 'Until:'}&nbsp;{`${formattedDeadline} ${status?.text}`}
+    </p>
   )
 }

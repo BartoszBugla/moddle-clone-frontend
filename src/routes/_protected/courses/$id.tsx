@@ -188,8 +188,9 @@ function CoursePage() {
                       <div className="flex w-full flex-col gap-2 border-border border p-4 rounded-md">
                         <div className="flex flex-row gap-2 w-full items-center justify-between">
                           <h4>{ex.exerciseName}</h4>
-                          <p>Deadline:</p>
-                          <Deadline deadline={ex?.deadLine} />
+                          <div className="flex flex-row justify-center items-center">
+                            <Deadline deadline={ex?.deadLine} />
+                          </div>
                         </div>
                         <p className="line-clamp-3 text-sm">
                           {ex.exerciseDescription}
