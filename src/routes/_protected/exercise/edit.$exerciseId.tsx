@@ -57,7 +57,7 @@ export function ExerciseManage() {
         >
           <div className="flex items-center gap-4 py-4 w-full">
             <Link
-              to={'/exercise/$exerciseId'}
+              to={'/exercise/teacher/$exerciseId'}
               params={{
                 exerciseId,
               }}

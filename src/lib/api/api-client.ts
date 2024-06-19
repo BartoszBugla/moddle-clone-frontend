@@ -67,6 +67,8 @@ export interface CreateExerciseDTO {
 
 export interface CreateGradeDTO {
   /** @format int32 */
+  exerciseId?: number
+  /** @format int32 */
   studentId?: number
   /** @format int32 */
   grade?: number
@@ -103,7 +105,7 @@ export interface GradeDTO {
   /** @format int32 */
   gradePercentage?: number | null
   /** @format date-time */
-  postDate?: string
+  postDate?: string | null
   /** @format int32 */
   fileUploadUrl?: number | null
 }
@@ -132,7 +134,7 @@ export interface InfoExerciseDTO {
 
 export interface InfoFileDTO {
   /** @format int32 */
-  id?: number
+  id?: number | null
   fileName?: string | null
 }
 
@@ -650,11 +652,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Grade
-     * @name AddGradeCreate
-     * @request POST:/grades/AddGrade/{exerciseId}
+     * @name AddTaskCreate
+     * @request POST:/grades/AddTask/{exerciseId}
      * @secure
      */
-    addGradeCreate: (
+    addTaskCreate: (
       exerciseId: number,
       data: {
         /** @format binary */
@@ -666,12 +668,172 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/grades/AddGrade/${exerciseId}`,
+        path: `/grades/AddTask/${exerciseId}`,
         method: 'POST',
         query: query,
         body: data,
         secure: true,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name UsersNotUploadTaskList
+     * @request GET:/grades/UsersNotUploadTask
+     * @secure
+     */
+    usersNotUploadTaskList: (
+      query?: {
+        /** @format int32 */
+        courseId?: number
+        /** @format int32 */
+        exerciseId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<UserDTO, any>({
+        path: `/grades/UsersNotUploadTask`,
+        method: 'GET',
+        query: query,
+        secure: true,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name UsersUploadedTaskList
+     * @request GET:/grades/UsersUploadedTask
+     * @secure
+     */
+    usersUploadedTaskList: (
+      query?: {
+        /** @format int32 */
+        courseId?: number
+        /** @format int32 */
+        exerciseId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<TeacherGradedExerciseDTO, any>({
+        path: `/grades/UsersUploadedTask`,
+        method: 'GET',
+        query: query,
+        secure: true,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name UpdateGradePartialUpdate
+     * @request PATCH:/grades/UpdateGrade
+     * @secure
+     */
+    updateGradePartialUpdate: (data: CreateGradeDTO, params: RequestParams = {}) =>
+      this.request<CreateGradeDTO, any>({
+        path: `/grades/UpdateGrade`,
+        method: 'PATCH',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name CreateGradeCreate
+     * @request POST:/grades/CreateGrade
+     * @secure
+     */
+    createGradeCreate: (data: CreateGradeDTO, params: RequestParams = {}) =>
+      this.request<CreateGradeDTO, any>({
+        path: `/grades/CreateGrade`,
+        method: 'POST',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name GetUserGradesInCourseList
+     * @request GET:/grades/GetUserGradesInCourse
+     * @secure
+     */
+    getUserGradesInCourseList: (
+      query?: {
+        /** @format int32 */
+        courseId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<GradeDTO, any>({
+        path: `/grades/GetUserGradesInCourse`,
+        method: 'GET',
+        query: query,
+        secure: true,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name DeleteUserTaskDelete
+     * @request DELETE:/grades/DeleteUserTask
+     * @secure
+     */
+    deleteUserTaskDelete: (
+      query?: {
+        /** @format int32 */
+        exerciseId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/grades/DeleteUserTask`,
+        method: 'DELETE',
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Grade
+     * @name DeleteFileFromTaskDelete
+     * @request DELETE:/grades/DeleteFileFromTask
+     * @secure
+     */
+    deleteFileFromTaskDelete: (
+      query?: {
+        /** @format int32 */
+        fileId?: number
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/grades/DeleteFileFromTask`,
+        method: 'DELETE',
+        query: query,
+        secure: true,
         ...params,
       }),
   }

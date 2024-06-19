@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui'
+import { Deadline } from '@/components/ui/deadline'
 import {
   useAcceptUserToCourse,
   useCourse,
@@ -51,14 +52,16 @@ function CoursePage() {
               to: '/dashboard',
             }}
           />
-          <Link
-            to="/courses/edit/$id"
-            params={{ id }}
-            className={cn('gap-3', buttonVariants({ variant: 'outline' }))}
-          >
-            <Settings className="size-5" />
-            Settings
-          </Link>
+          {isOnwer && (
+            <Link
+              to="/courses/edit/$id"
+              params={{ id }}
+              className={cn('gap-3', buttonVariants({ variant: 'outline' }))}
+            >
+              <Settings className="size-5" />
+              Settings
+            </Link>
+          )}
         </div>
 
         <div className="sm:col-span-6 col-span-1 row-span-1 ">
@@ -185,11 +188,8 @@ function CoursePage() {
                       <div className="flex w-full flex-col gap-2 border-border border p-4 rounded-md">
                         <div className="flex flex-row gap-2 w-full items-center justify-between">
                           <h4>{ex.exerciseName}</h4>
-                          <p className="text-muted-foreground text-sm">
-                            Deadline:{' '}
-                            {ex.deadLine &&
-                              format(ex.deadLine, APP_DATETIME_FORMAT)}
-                          </p>
+
+                          <Deadline deadline={ex?.deadLine} />
                         </div>
                         <p className="line-clamp-3 text-sm">
                           {ex.exerciseDescription}

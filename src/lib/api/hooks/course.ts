@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 
 import { useErrorHandler } from '@/lib/error-handler/use-error-handler'
 import { api } from '../api'
-import { CourseDTO } from '../api-client'
+import { CourseDTO, CourseInfoDTO } from '../api-client'
 
 export const useCourse = (id?: number) => {
   const errorHandler = useErrorHandler()
@@ -78,6 +78,24 @@ export const useDeleteCourse = () => {
 
   return useMutation({
     mutationFn: (id: number) => api.courses.coursesDelete(id),
+    onSuccess: () => {
+      navigate({ to: '/dashboard' })
+    },
+    onError: (err) => errorHandler(err, { notify: true }),
+  })
+}
+
+export const useEditCourse = (
+  options?: UseMutationOptions<void, unknown, CourseDTO & { id: number }>
+) => {
+  const queryClient = useQueryClient()
+  const errorHandler = useErrorHandler()
+  const navigate = useNavigate()
+
+  return useMutation({
+    ...options,
+    mutationFn: (data: CourseInfoDTO & { id: number }) =>
+      api.courses.coursesPartialUpdate(data.id, data),
     onSuccess: () => {
       navigate({ to: '/dashboard' })
     },

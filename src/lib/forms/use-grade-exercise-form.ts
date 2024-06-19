@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-import { useCreateGrade } from '../api/hooks/exercise'
+import { useGradeExercise } from '../api/hooks/grade'
 
 export enum GradeExerciseFormField {
   Grade = 'grade',
@@ -11,8 +11,11 @@ export enum GradeExerciseFormField {
 }
 
 export const validationSchema = z.object({
-  [GradeExerciseFormField.Grade]: z.number().min(0).max(100),
-  [GradeExerciseFormField.Comment]: z.string().min(1),
+  [GradeExerciseFormField.Grade]: z.coerce
+    .number()
+    .min(1, 'Grade must be a number between 1 and 100')
+    .max(100, 'Grade must be a number between 1 and 100'),
+  [GradeExerciseFormField.Comment]: z.string(),
 })
 
 export type GradeExerciseFormValues = z.infer<typeof validationSchema>
@@ -26,7 +29,7 @@ export const useGradeExerciseForm = (
     resolver: zodResolver(validationSchema),
   })
 
-  const { mutateAsync: gradeExercise } = useCreateGrade()
+  const { mutateAsync: gradeExercise } = useGradeExercise()
   const onSubmit = formProps.handleSubmit((values) => {
     gradeExercise({
       exerciseId,

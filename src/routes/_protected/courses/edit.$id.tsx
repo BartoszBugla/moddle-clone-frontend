@@ -22,6 +22,7 @@ function ManageCourse() {
   const { id } = Route.useParams<{ id: string }>()
   const { data: courseData } = useCourse(Number(id))
   const { onSubmit, formProps } = useCourseForm(
+    Number(id),
     useMemo(
       () => ({
         name: courseData?.name || '',

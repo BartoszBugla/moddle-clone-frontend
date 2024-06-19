@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { useCreateCourse } from '../api/hooks/course'
+import { useCreateCourse, useEditCourse } from '../api/hooks/course'
 
 export enum ManageCourseFormField {
   Name = 'name',
@@ -19,7 +19,10 @@ const validationSchema = z.object({
 
 export type CourseFormType = z.infer<typeof validationSchema>
 
-export const useCourseForm = (initialState?: CourseFormType) => {
+export const useCourseForm = (
+  courseId?: number,
+  initialState?: CourseFormType
+) => {
   const formProps = useForm({
     resolver: zodResolver(validationSchema),
   })
@@ -37,7 +40,22 @@ export const useCourseForm = (initialState?: CourseFormType) => {
     },
   })
 
-  const onSubmit = formProps.handleSubmit((values) => {
+  const { mutateAsync: editCourse } = useEditCourse({})
+
+  const onSubmit = formProps.handleSubmit(async (values) => {
+    if (courseId) {
+      const data = await editCourse({ ...values, id: courseId })
+
+      toast.success('Exercise Edited successfully')
+
+      navigate({
+        to: '/courses/$id',
+        params: {
+          id: courseId,
+        },
+      })
+      return
+    }
     createCourse(values)
   })
 
